@@ -181,7 +181,9 @@ void main() {
       test(
           "In the starting position, non-pawns and non-knights have no legal moves",
           () {
-        final game = Game(fenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        final game = Game(
+            fenString:
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
         const Set<(int, int)> expectedResult = {};
 
@@ -204,7 +206,9 @@ void main() {
 
       test("In the starting position only pawns and knights have legal moves",
           () {
-        final game = Game(fenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        final game = Game(
+            fenString:
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
         const Set<(int, int)> whiteQueensideKnightMoves = {(5, 0), (5, 2)};
         const Set<(int, int)> whiteKingsideKnightMoves = {(5, 5), (5, 7)};
