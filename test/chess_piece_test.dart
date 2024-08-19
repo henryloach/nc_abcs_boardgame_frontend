@@ -130,6 +130,7 @@ void main() {
 
         final expectedResult = {
           (5, 0),
+          (4, 0),
         };
 
         expect(getLegalMoves(board, (6, 0)), expectedResult);
@@ -140,9 +141,46 @@ void main() {
 
         final expectedResult = {
           (2, 0),
+          (3, 0),
         };
 
         expect(getLegalMoves(board, (1, 0)), expectedResult);
+      });
+
+      test("Pawns can capture diagonaly", () {
+        final board = decodeFEN("8/8/8/2n1b3/3P4/8/8/8 w - - 0 1");
+
+        board[4][3]!.hasMoved = true;
+
+        final expectedResult = {
+          (3, 2),
+          (3, 3),
+          (3, 4),
+        };
+
+        expect(getLegalMoves(board, (4, 3)), expectedResult);
+      });
+
+      test("Pawns cannot capture an oposing piece directly in front of them",
+          () {
+        final board = decodeFEN("8/8/8/2nrb3/3P4/8/8/8 w - - 0 1");
+
+        final expectedResult = {
+          (3, 2),
+          (3, 4),
+        };
+
+        expect(getLegalMoves(board, (4, 3)), expectedResult);
+      });
+
+      test("Pawns cannot capture using inital double move", () {
+        final board = decodeFEN("8/8/8/8/p7/8/P7/8 w - - 0 1");
+
+        final expectedResult = {
+          (5, 0),
+        };
+
+        expect(getLegalMoves(board, (6, 0)), expectedResult);
       });
     });
 
@@ -186,6 +224,19 @@ void main() {
         expect(getLegalMoves(board, (7, 6)), whiteKingsideKnightMoves);
         expect(getLegalMoves(board, (0, 1)), blackQueensideKnightMoves);
         expect(getLegalMoves(board, (0, 6)), blackKingsideKnightMoves);
+      });
+
+      test(
+          "Sliding pieces may only capture first openent piece in direction of movement",
+          () {
+        final board = decodeFEN("p7/1p6/2p5/3p4/4p3/5p2/8/7B w - - 0 1");
+
+        const expectedResult = {
+          (6, 6),
+          (5, 5),
+        };
+
+        expect(getLegalMoves(board, (7, 7)), expectedResult);
       });
     });
   });

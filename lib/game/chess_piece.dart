@@ -22,7 +22,8 @@ enum PieceColour {
   white,
 }
 
-Set<(int, int)> getLegalMoves(List<List<ChessPiece?>> board, (int, int) square) {
+Set<(int, int)> getLegalMoves(
+    List<List<ChessPiece?>> board, (int, int) square) {
   final ChessPiece? piece = board[square.$1][square.$2];
 
   Set<(int, int)> seek(
@@ -35,23 +36,38 @@ Set<(int, int)> getLegalMoves(List<List<ChessPiece?>> board, (int, int) square) 
     final int boardHeight = board.length;
     final int boardWidth = board[0].length;
 
-    var y = square.$1;
-    var x = square.$2;
+    var (y, x) = square;
+    var (dy, dx) = direction;
+
+    if (piece!.colour == PieceColour.white) dy = -dy;
 
     do {
-      y = piece!.colour == PieceColour.white ? y - direction.$1 : y + direction.$1;
-      x = x + direction.$2;
+      y = y + dy;
+      x = x + dx;
 
       if (y >= boardHeight || y < 0) break;
       if (x >= boardWidth || x < 0) break;
 
       final ChessPiece? targetPiece = board[y][x];
 
-      if (captureRule == CaptureRule.captureOnly && targetPiece == null) break;
-      if (captureRule == CaptureRule.moveOnly && targetPiece != null) break;
-      if (targetPiece != null && targetPiece.colour == piece.colour) break;
+      if (targetPiece != null) {
+        if (targetPiece.colour == piece.colour) break;
+        if (captureRule == CaptureRule.moveOnly) break;
 
-      resultSet.add((y, x));
+        resultSet.add((y, x));
+
+        break;
+      } else {
+        if (captureRule == CaptureRule.captureOnly) break;
+
+        resultSet.add((y, x));
+
+        if (piece.type == PieceType.pawn &&
+            piece.hasMoved == false &&
+            board[y + dy][x + dx] == null) {
+          resultSet.add((y + dy, x + dx));
+        }
+      }
     } while (canRepeat);
 
     return resultSet;
@@ -72,5 +88,3 @@ Set<(int, int)> getLegalMoves(List<List<ChessPiece?>> board, (int, int) square) 
 
   return legalMoves;
 }
-
-
