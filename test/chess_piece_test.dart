@@ -37,7 +37,7 @@ void main() {
         final board = decodeFEN("8/8/8/8/8/8/8/3Q4 w - - 0 1");
 
         final expectedResult = {
-          // 
+          //
           (6, 3),
           (5, 3),
           (4, 3),
@@ -147,7 +147,9 @@ void main() {
     });
 
     group("Piece blocking", () {
-      test("In the starting position pieces non-pawns and non-knights have no legal moves", () {
+      test(
+          "In the starting position pieces non-pawns and non-knights have no legal moves",
+          () {
         final board = decodeFEN(
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
@@ -170,14 +172,15 @@ void main() {
         expect(getLegalMoves(board, (7, 7)), expectedResult);
       });
 
-      test("In the starting position only pawns and knights have legal moves", () {
+      test("In the starting position only pawns and knights have legal moves",
+          () {
         final board = decodeFEN(
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
-        const Set<(int, int)> whiteQueensideKnightMoves = {(5,0), (5,2)};
-        const Set<(int, int)> whiteKingsideKnightMoves = {(5,5), (5,7)};
-        const Set<(int, int)> blackQueensideKnightMoves = {(2,0), (2,2)};
-        const Set<(int, int)> blackKingsideKnightMoves = {(2,5), (2,7)};
+        const Set<(int, int)> whiteQueensideKnightMoves = {(5, 0), (5, 2)};
+        const Set<(int, int)> whiteKingsideKnightMoves = {(5, 5), (5, 7)};
+        const Set<(int, int)> blackQueensideKnightMoves = {(2, 0), (2, 2)};
+        const Set<(int, int)> blackKingsideKnightMoves = {(2, 5), (2, 7)};
 
         expect(getLegalMoves(board, (7, 1)), whiteQueensideKnightMoves);
         expect(getLegalMoves(board, (7, 6)), whiteKingsideKnightMoves);
