@@ -1,25 +1,11 @@
+import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
+
 class ChessPiece {
   final PieceType type;
   final PieceColour colour;
+  bool hasMoved = false;
 
-  const ChessPiece(this.type, this.colour);
-}
-
-class Square {
-  final int row;
-  final int column;
-
-  const Square(this.row, this.column);
-
-  @override
-  bool operator ==(Object other) {
-    //if (identical(this, other)) return true;
-    if (other is! Square) return false;
-    return other.row == row && other.column == column;
-  }
-
-  @override
-  int get hashCode => row.hashCode ^ column.hashCode;
+  ChessPiece(this.type, this.colour);
 }
 
 enum PieceType {
@@ -36,28 +22,25 @@ enum PieceColour {
   white,
 }
 
-enum CaptureRule { captureOnly, moveOnly, both }
+Set<(int, int)> getLegalMoves(List<List<ChessPiece?>> board, (int, int) square) {
+  final ChessPiece? piece = board[square.$1][square.$2];
 
-Set<Square> getLegalMoves(List<List<ChessPiece?>> board, Square square) {
-  final ChessPiece? piece = board[square.row][square.column];
-
-  Set<Square> seek(
-    int dy,
-    int dx,
+  Set<(int, int)> seek(
+    (int, int) direction,
     bool canRepeat,
     CaptureRule captureRule,
   ) {
-    Set<Square> resultSet = {};
+    Set<(int, int)> resultSet = {};
 
     final int boardHeight = board.length;
     final int boardWidth = board[0].length;
 
-    var y = square.row;
-    var x = square.column;
+    var y = square.$1;
+    var x = square.$2;
 
     do {
-      y = piece!.colour == PieceColour.white ? y - dy : y + dy;
-      x = x + dx;
+      y = piece!.colour == PieceColour.white ? y - direction.$1 : y + direction.$1;
+      x = x + direction.$2;
 
       if (y >= boardHeight || y < 0) break;
       if (x >= boardWidth || x < 0) break;
@@ -68,7 +51,7 @@ Set<Square> getLegalMoves(List<List<ChessPiece?>> board, Square square) {
       if (captureRule == CaptureRule.moveOnly && targetPiece != null) break;
       if (targetPiece != null && targetPiece.colour == piece.colour) break;
 
-      resultSet.add(Square(y, x));
+      resultSet.add((y, x));
     } while (canRepeat);
 
     return resultSet;
@@ -78,64 +61,16 @@ Set<Square> getLegalMoves(List<List<ChessPiece?>> board, Square square) {
     return {};
   }
 
-  Set<Square> legalMoves = {};
+  Set<(int, int)> legalMoves = {};
 
   moveRuleMap[piece.type].forEach((moveRule) {
     legalMoves = {
       ...legalMoves,
-      ...seek(moveRule[0], moveRule[1], moveRule[2], moveRule[3])
+      ...seek(moveRule[0], moveRule[1], moveRule[2])
     };
   });
 
   return legalMoves;
 }
 
-Map moveRuleMap = {
-  PieceType.king: [
-    [0, 1, false, CaptureRule.both],
-    [0, -1, false, CaptureRule.both],
-    [1, 0, false, CaptureRule.both],
-    [1, 1, false, CaptureRule.both],
-    [1, -1, false, CaptureRule.both],
-    [-1, 0, false, CaptureRule.both],
-    [-1, 1, false, CaptureRule.both],
-    [-1, -1, false, CaptureRule.both],
-  ],
-  PieceType.queen: [
-    [0, 1, true, CaptureRule.both],
-    [0, -1, true, CaptureRule.both],
-    [1, 0, true, CaptureRule.both],
-    [1, 1, true, CaptureRule.both],
-    [1, -1, true, CaptureRule.both],
-    [-1, 0, true, CaptureRule.both],
-    [-1, 1, true, CaptureRule.both],
-    [-1, -1, true, CaptureRule.both],
-  ],
-  PieceType.bishop: [
-    [1, 1, true, CaptureRule.both],
-    [1, -1, true, CaptureRule.both],
-    [-1, 1, true, CaptureRule.both],
-    [-1, -1, true, CaptureRule.both],
-  ],
-  PieceType.knight: [
-    [1, 2, false, CaptureRule.both],
-    [1, -2, false, CaptureRule.both],
-    [2, 1, false, CaptureRule.both],
-    [2, -1, false, CaptureRule.both],
-    [-1, 2, false, CaptureRule.both],
-    [-1, -2, false, CaptureRule.both],
-    [-2, 1, false, CaptureRule.both],
-    [-2, -1, false, CaptureRule.both],
-  ],
-  PieceType.rook: [
-    [0, 1, true, CaptureRule.both],
-    [0, -1, true, CaptureRule.both],
-    [1, 0, true, CaptureRule.both],
-    [-1, 0, true, CaptureRule.both],
-  ],
-  PieceType.pawn: [
-    [1, 0, false, CaptureRule.moveOnly],
-    [1, 1, false, CaptureRule.captureOnly],
-    [1, -1, false, CaptureRule.captureOnly],
-  ]
-};
+

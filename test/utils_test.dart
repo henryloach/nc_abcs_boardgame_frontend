@@ -27,7 +27,7 @@ void main() {
       const inputString =
           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-      const expectedResult = [
+      var expectedResult = [
         [
           ChessPiece(PieceType.rook, PieceColour.black),
           ChessPiece(PieceType.knight, PieceColour.black),
