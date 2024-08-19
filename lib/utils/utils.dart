@@ -32,3 +32,10 @@ List<List<ChessPiece?>> decodeFEN(String fenString) {
     return rowList;
   }).toList();
 }
+
+String recordToAlphanumeric((int, int) record, boardHeight, boardWidth) {
+  final (rowIndex, columnIndex) = record;
+  final rowNumber = boardHeight - rowIndex;
+  final columnLetter = String.fromCharCode(65 + columnIndex);
+  return "$columnLetter$rowNumber";
+}
