@@ -1,23 +1,4 @@
-enum PieceType {
-  king,
-  queen,
-  bishop,
-  knight,
-  rook,
-  pawn,
-}
-
-enum PieceColour {
-  black,
-  white,
-}
-
-class ChessPiece {
-  final PieceType type;
-  final PieceColour colour;
-
-  const ChessPiece(this.type, this.colour);
-}
+import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 const Map<String, ChessPiece> fenMap = {
   "k": ChessPiece(PieceType.king, PieceColour.black),
