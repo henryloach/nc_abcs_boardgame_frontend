@@ -1,5 +1,6 @@
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:test/test.dart';
+import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 void main() {
   group("decodeFEN()", () {
