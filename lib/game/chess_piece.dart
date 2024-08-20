@@ -14,6 +14,10 @@ class ChessPiece {
 
   @override
   int get hashCode => type.hashCode ^ colour.hashCode;
+
+  String get assetPath {
+    return "assets/svg/${colour.name}-${type.name}.svg";
+  }
 }
 
 enum PieceType {
