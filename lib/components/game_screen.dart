@@ -48,6 +48,7 @@ class GameScreenState extends State<GameScreen> {
                             height: tileWidth,
                             child: Text('$x, $y'),
                           ))
+                  // to reverse the list
                 ])).reversed.toList())
       ],
     );
