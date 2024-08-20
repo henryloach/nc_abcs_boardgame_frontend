@@ -234,6 +234,13 @@ void main() {
 
         expect(game.getLegalMoves((7, 7)), expectedResult);
       });
+      // test("piece can't move if it's pinned", () {
+      //   final game = Game(fenString: "7q/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+      //   Set expectedResult = {};
+
+      //   expect(game.getLegalMoves((6, 1)), expectedResult);
+      // });
     });
   });
 
@@ -259,6 +266,29 @@ void main() {
       game.movePiece((1, 4), (3, 4));
 
       expect(game.board, expectedPosition);
+    });
+  });
+
+  group("testForChecks()" , () {
+    test("king attacked by one piece", () {
+      final game = Game(fenString: "7q/8/8/8/8/8/8/K7 w - - 0 1");
+
+      const expectedResult = {
+        (0,7),
+      };
+
+      expect(game.testForChecks(), expectedResult);
+    });
+    test("king attacked by miltiple pieces", () {
+      final game = Game(fenString: "q6q/8/8/8/8/8/8/K6q w - - 0 1");
+
+      const expectedResult = {
+        (0,0),
+        (0,7),
+        (7,7),
+      };
+
+      expect(game.testForChecks(), expectedResult);
     });
   });
 }

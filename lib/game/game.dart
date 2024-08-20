@@ -34,15 +34,15 @@ class Game {
     // capture opponent's (or maybe your own) piece at the end square if one's there;
     if (target != null) {
       capturedPieces.add(target);
-    } 
+    }
 
-    // move selected piece to the end square;   
+    // move selected piece to the end square;
     piece!.hasMoved = true;
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
   }
 
-  Set<(int, int)> getLegalMoves((int, int) square) {
+  Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = false}) {
     final (row, column) = square;
     final ChessPiece? piece = board[row][column];
 
@@ -107,5 +107,27 @@ class Game {
     });
 
     return legalMoves;
+  }
+
+  Set<(int, int)> testForChecks() {
+    Set<(int, int)> checks = {};
+    for (var row = 0; row < board.length; row++) {
+      for (var column = 0; column < board[0].length; column++) {
+        final piece = board[row][column];
+        final moves = getLegalMoves((row, column), testCheck: false);
+        if (moves.any(
+          (move) {
+            final (y, x) = move;
+            final target = board[y][x];
+            return target != null &&
+                target.type == PieceType.king &&
+                target.colour != piece!.colour;
+          },
+        )) {
+          checks.add((row, column));
+        }
+      }
+    }
+    return checks;
   }
 }
