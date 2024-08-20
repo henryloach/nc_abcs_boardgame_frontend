@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
+import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({Key? key}) : super(key: key);
@@ -22,10 +23,45 @@ class GameScreenState extends State<GameScreen> {
         highlighted = game.getLegalMoves((y, x));
       } else {
         if (highlighted.contains((y, x))) {
+          ChessPiece? capturedPiece = game.board[y][x];
           game.movePiece(selected!, (y, x));
+
+          if (capturedPiece != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${capturedPiece.colour.name} ${capturedPiece.type.name} captured!',
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+
           highlighted = {};
           selected = null;
         } else {
+          if (selected != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Invalid move!',
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
           selected = (y, x);
           highlighted = game.getLegalMoves((y, x));
         }
