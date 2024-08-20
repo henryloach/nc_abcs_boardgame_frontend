@@ -23,15 +23,23 @@ class Game {
     return target.assetPath;
   }
 
-  void movePiece((int, int) start, (int, int) end) {
-    final (startRow, startColumn) = start;
-    final (endRow, endColumn) = end;
-    if (board[endRow][endColumn] != null) {
-      capturedPieces.add(board[endRow][endColumn]!);
-    }
 
-    board[startRow][startColumn]!.hasMoved = true;
-    board[endRow][endColumn] = board[startRow][startColumn];
+  // safety of this function relies on args coming from legal move set.
+  // This function has no restrictions on what can be moved where.
+  void movePiece((int, int) moveFromSquare, (int, int) moveToSquare) {
+    final (startRow, startColumn) = moveFromSquare;
+    final (endRow, endColumn) = moveToSquare;
+    final ChessPiece? piece = board[startRow][startColumn];
+    final ChessPiece? target = board[endRow][endColumn];
+
+    // capture opponent's (or maybe your own) piece at the end square if one's there;
+    if (target != null) {
+      capturedPieces.add(target);
+    } 
+
+    // move selected piece to the end square;   
+    piece!.hasMoved = true;
+    board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
   }
 

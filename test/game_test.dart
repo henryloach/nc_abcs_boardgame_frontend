@@ -1,3 +1,4 @@
+import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:test/test.dart';
 
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
@@ -233,6 +234,31 @@ void main() {
 
         expect(game.getLegalMoves((7, 7)), expectedResult);
       });
+    });
+  });
+
+  group("movePiece()", () {
+    test("e4", () {
+      final game = Game();
+
+      final expectedPosition = decodeFEN(
+          "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+
+      game.movePiece((6, 4), (4, 4));
+
+      expect(game.board, expectedPosition);
+    });
+
+        test("e4 e5", () {
+      final game = Game();
+
+      final expectedPosition = decodeFEN(
+          "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2");
+
+      game.movePiece((6, 4), (4, 4));
+      game.movePiece((1, 4), (3, 4));
+
+      expect(game.board, expectedPosition);
     });
   });
 }
