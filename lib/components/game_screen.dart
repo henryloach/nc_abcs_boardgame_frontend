@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({Key? key}) : super(key: key);
@@ -6,6 +8,8 @@ class GameScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => GameScreenState();
 }
+
+var game = Game();
 
 class GameScreenState extends State<GameScreen> {
   // media query - size of the screen
@@ -46,10 +50,11 @@ class GameScreenState extends State<GameScreen> {
                             ),
                             width: tileWidth,
                             height: tileWidth,
-                            child: Text('$x, $y'),
+                            child: game.getAssetPathAtSquare((y,x)) != "" ? SvgPicture.asset(game.getAssetPathAtSquare((y,x)),
+                            ): const Text("e"),
                           ))
                   // to reverse the list's coordinates
-                ])).reversed.toList())
+                ])).toList())
       ],
     );
   }

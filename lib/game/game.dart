@@ -16,6 +16,13 @@ class Game {
           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"})
       : board = decodeFEN(fenString); // this is an "initializer list"
 
+  String getAssetPathAtSquare((int, int) square) {
+    final (row, column) = square;
+    final target = board[row][column];
+    if (target == null) return "";
+    return target.assetPath;
+  }
+
   Set<(int, int)> getLegalMoves((int, int) square) {
     final (row, column) = square;
     final ChessPiece? piece = board[row][column];
