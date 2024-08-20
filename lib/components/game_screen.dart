@@ -13,6 +13,25 @@ var game = Game();
 
 class GameScreenState extends State<GameScreen> {
   Set highlighted = {};
+  (int, int)? selected;
+
+  handleClick(y, x) {
+    setState(() {
+      if (selected == null) {
+        selected = (y, x);
+        highlighted = game.getLegalMoves((y, x));
+      } else {
+        if (highlighted.contains((y, x))) {
+          game.movePiece(selected!, (y, x));
+          highlighted = {};
+          selected = null;
+        } else {
+          selected = (y, x);
+          highlighted = game.getLegalMoves((y, x));
+        }
+      }
+    });
+  }
 
   // media query - size of the screen
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
@@ -41,21 +60,20 @@ class GameScreenState extends State<GameScreen> {
   Column buildChessBoard() {
     return Column(
       children: [
+        Text("${game.capturedPieces.map((piece) => "${piece.colour.name} ${piece.type.name}")}"),
+        Text("$selected"),
         ...(List.generate(
             8,
             (y) => Row(children: [
                   ...List.generate(
                       8,
                       (x) => IconButton(
-                            onPressed: () {
-                              setState(() {
-                                highlighted = game.getLegalMoves((y, x));
-                              });
-                            },
+                            onPressed: () => handleClick(y, x),
                             icon: Container(
                               decoration: BoxDecoration(
-                                color: highlighted.contains((y,x)) ? Colors.red :
-                                buildChessTileColour(x, y),
+                                color: highlighted.contains((y, x))
+                                    ? Colors.red
+                                    : buildChessTileColour(x, y),
                               ),
                               width: tileWidth,
                               height: tileWidth,
