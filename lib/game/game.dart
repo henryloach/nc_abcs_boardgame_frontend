@@ -23,6 +23,17 @@ class Game {
     return target.assetPath;
   }
 
+  void movePiece((int, int) start, (int, int) end) {
+    final (startRow, startColumn) = start;
+    final (endRow, endColumn) = end;
+    if (board[endRow][endColumn] != null) {
+      capturedPieces.add(board[endRow][endColumn]!);
+    }
+    board[startRow][startColumn]!.hasMoved = true;
+    board[endRow][endColumn] = board[startRow][startColumn];
+    board[startRow][startColumn] = null;
+  }
+
   Set<(int, int)> getLegalMoves((int, int) square) {
     final (row, column) = square;
     final ChessPiece? piece = board[row][column];
