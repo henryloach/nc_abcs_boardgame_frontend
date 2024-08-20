@@ -12,6 +12,8 @@ class GameScreen extends StatefulWidget {
 var game = Game();
 
 class GameScreenState extends State<GameScreen> {
+  Set highlighted = {};
+
   // media query - size of the screen
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
   // colours from https://www.rapidtables.com/web/color/blue-color.html
@@ -44,14 +46,25 @@ class GameScreenState extends State<GameScreen> {
             (y) => Row(children: [
                   ...List.generate(
                       8,
-                      (x) => Container(
-                            decoration: BoxDecoration(
-                              color: buildChessTileColour(x, y),
+                      (x) => IconButton(
+                            onPressed: () {
+                              setState(() {
+                                highlighted = game.getLegalMoves((y, x));
+                              });
+                            },
+                            icon: Container(
+                              decoration: BoxDecoration(
+                                color: highlighted.contains((y,x)) ? Colors.red :
+                                buildChessTileColour(x, y),
+                              ),
+                              width: tileWidth,
+                              height: tileWidth,
+                              child: game.getAssetPathAtSquare((y, x)) != ""
+                                  ? SvgPicture.asset(
+                                      game.getAssetPathAtSquare((y, x)),
+                                    )
+                                  : Text("$highlighted"),
                             ),
-                            width: tileWidth,
-                            height: tileWidth,
-                            child: game.getAssetPathAtSquare((y,x)) != "" ? SvgPicture.asset(game.getAssetPathAtSquare((y,x)),
-                            ): const Text("e"),
                           ))
                   // to reverse the list's coordinates
                 ])).toList())
