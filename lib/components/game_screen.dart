@@ -95,9 +95,15 @@ class GameScreenState extends State<GameScreen> {
   Column buildChessBoard() {
     return Column(
       children: [
-        Text(
-            "${game.capturedPieces.map((piece) => "${piece.colour.name} ${piece.type.name}")}"),
-        Text("$selected"),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ...game.capturedPieces
+              .where((piece) => piece.colour.name == 'white')
+              .map((piece) => SvgPicture.asset(
+                    "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
+                    height: 25,
+                    width: 25,
+                  ))
+        ]),
         ...(List.generate(
           8,
           (y) => Row(children: [
@@ -127,6 +133,15 @@ class GameScreenState extends State<GameScreen> {
             ),
           ]),
         )),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ...game.capturedPieces
+              .where((piece) => piece.colour.name == 'black')
+              .map((piece) => SvgPicture.asset(
+                    "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
+                    height: 25,
+                    width: 25,
+                  ))
+        ]),
       ],
     );
   }
