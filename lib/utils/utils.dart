@@ -1,6 +1,6 @@
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
-const Map<String, ChessPiece> fenMap = {
+Map<String, ChessPiece> fenMap = {
   "k": ChessPiece(PieceType.king, PieceColour.black),
   "q": ChessPiece(PieceType.queen, PieceColour.black),
   "b": ChessPiece(PieceType.bishop, PieceColour.black),
@@ -31,4 +31,11 @@ List<List<ChessPiece?>> decodeFEN(String fenString) {
 
     return rowList;
   }).toList();
+}
+
+String recordToAlphanumeric((int, int) record, boardHeight, boardWidth) {
+  final (rowIndex, columnIndex) = record;
+  final rowNumber = boardHeight - rowIndex;
+  final columnLetter = String.fromCharCode(65 + columnIndex);
+  return "$columnLetter$rowNumber";
 }

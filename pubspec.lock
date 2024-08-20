@@ -438,7 +438,7 @@ packages:
     source: hosted
     version: "1.2.1"
   test:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: test
       sha256: "7ee44229615f8f642b68120165ae4c2a75fe77ae2065b1e55ae4711f6cf0899e"

@@ -25,5 +25,3 @@ A quick reference guide for comparing common Dart/Flutter commands and concepts 
 |----------------------------|-------------------------|
 | `const`                    | `final`                 |
 | `let`                      | `var`                   |
-| `test.only`                | `solo_test`             |
-| `describe.only`            | `solo_group`            |
