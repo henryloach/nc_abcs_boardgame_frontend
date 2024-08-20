@@ -15,6 +15,7 @@ var game = Game();
 class GameScreenState extends State<GameScreen> {
   Set highlighted = {};
   (int, int)? selected;
+  (int, int)? previousMove;
 
   handleClick(y, x) {
     setState(() {
@@ -23,6 +24,8 @@ class GameScreenState extends State<GameScreen> {
         highlighted = game.getLegalMoves((y, x));
       } else {
         if (highlighted.contains((y, x))) {
+          previousMove = selected;
+
           ChessPiece? capturedPiece = game.board[y][x];
           game.movePiece(selected!, (y, x));
 
@@ -110,7 +113,9 @@ class GameScreenState extends State<GameScreen> {
                   decoration: BoxDecoration(
                     border: highlighted.contains((y, x))
                         ? Border.all(color: Colors.black54)
-                        : Border.all(color: Colors.black12),
+                        : (previousMove == (y, x)
+                            ? Border.all(color: Colors.blue, width: 3)
+                            : Border.all(color: Colors.black12)),
                     color: highlighted.contains((y, x))
                         ? const Color.fromARGB(255, 229, 155, 45)
                         : buildChessTileColour(x, y),

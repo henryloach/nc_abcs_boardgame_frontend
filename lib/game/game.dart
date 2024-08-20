@@ -29,6 +29,7 @@ class Game {
     if (board[endRow][endColumn] != null) {
       capturedPieces.add(board[endRow][endColumn]!);
     }
+
     board[startRow][startColumn]!.hasMoved = true;
     board[endRow][endColumn] = board[startRow][startColumn];
     board[startRow][startColumn] = null;
