@@ -33,7 +33,6 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
-  // media query - size of the screen
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
   // colours from https://www.rapidtables.com/web/color/blue-color.html
   final Color deepskyblue = const Color.fromRGBO(0, 191, 255, 100);
@@ -60,32 +59,38 @@ class GameScreenState extends State<GameScreen> {
   Column buildChessBoard() {
     return Column(
       children: [
-        Text("${game.capturedPieces.map((piece) => "${piece.colour.name} ${piece.type.name}")}"),
+        Text(
+            "${game.capturedPieces.map((piece) => "${piece.colour.name} ${piece.type.name}")}"),
         Text("$selected"),
         ...(List.generate(
-            8,
-            (y) => Row(children: [
-                  ...List.generate(
-                      8,
-                      (x) => IconButton(
-                            onPressed: () => handleClick(y, x),
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                color: highlighted.contains((y, x))
-                                    ? Colors.red
-                                    : buildChessTileColour(x, y),
-                              ),
-                              width: tileWidth,
-                              height: tileWidth,
-                              child: game.getAssetPathAtSquare((y, x)) != ""
-                                  ? SvgPicture.asset(
-                                      game.getAssetPathAtSquare((y, x)),
-                                    )
-                                  : Text("$highlighted"),
-                            ),
-                          ))
-                  // to reverse the list's coordinates
-                ])).toList())
+          8,
+          (y) => Row(children: [
+            ...List.generate(
+              8,
+              (x) => IconButton(
+                padding: const EdgeInsets.all(0),
+                onPressed: () => handleClick(y, x),
+                icon: Container(
+                  decoration: BoxDecoration(
+                    border: highlighted.contains((y, x))
+                        ? Border.all(color: Colors.black54)
+                        : Border.all(color: Colors.black12),
+                    color: highlighted.contains((y, x))
+                        ? const Color.fromARGB(255, 229, 155, 45)
+                        : buildChessTileColour(x, y),
+                  ),
+                  width: tileWidth,
+                  height: tileWidth,
+                  child: game.getAssetPathAtSquare((y, x)) != ""
+                      ? SvgPicture.asset(
+                          game.getAssetPathAtSquare((y, x)),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ]),
+        )),
       ],
     );
   }
