@@ -10,6 +10,8 @@ class Game {
   List<List<ChessPiece?>> board;
   List<ChessPiece> capturedPieces = [];
 
+  Set<(int, int)> checks = {};
+
   // Constructor with an optional named parameter for the FEN string
   Game(
       {String fenString =
@@ -40,9 +42,11 @@ class Game {
     piece!.hasMoved = true;
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
+
+    checks = testBoardForChecks();
   }
 
-  Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = false}) {
+  Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
     final (row, column) = square;
     final ChessPiece? piece = board[row][column];
 
@@ -82,6 +86,7 @@ class Game {
 
           resultSet.add((y, x));
 
+          // pawn initial double-move
           if (piece.type == PieceType.pawn &&
               piece.hasMoved == false &&
               board[y + dy][x + dx] == null) {
@@ -106,10 +111,16 @@ class Game {
       };
     });
 
+    if (testCheck) {
+      legalMoves.removeWhere((targetSquare) {
+        return testMoveForOpposingChecks(square, targetSquare);
+      });
+    }
+
     return legalMoves;
   }
 
-  Set<(int, int)> testForChecks() {
+  Set<(int, int)> testBoardForChecks() {
     Set<(int, int)> checks = {};
     for (var row = 0; row < board.length; row++) {
       for (var column = 0; column < board[0].length; column++) {
@@ -129,5 +140,31 @@ class Game {
       }
     }
     return checks;
+  }
+
+  bool testMoveForOpposingChecks(
+      (int, int) moveFromSquare, (int, int) moveToSquare) {
+    final (startRow, startColumn) = moveFromSquare;
+    final (endRow, endColumn) = moveToSquare;
+    final piece = board[startRow][startColumn];
+    final target = board[endRow][endColumn];
+
+    // provisional move
+    board[endRow][endColumn] = piece;
+    board[startRow][startColumn] = null;
+
+    final checks = testBoardForChecks();
+
+    // remove this move
+    checks.remove(moveToSquare);
+
+    // restore position
+    board[startRow][startColumn] = piece;
+    board[endRow][endColumn] = target;
+
+    return checks.any((check) {
+      final checkingPiece = board[check.$1][check.$2];
+      return checkingPiece!.colour != piece!.colour;
+    });
   }
 }
