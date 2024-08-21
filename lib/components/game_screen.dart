@@ -4,15 +4,20 @@ import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key}) : super(key: key);
+  const GameScreen({Key? key, required this.username}) : super(key: key);
+  
+  final String username;
 
   @override
-  State<StatefulWidget> createState() => GameScreenState();
+  State<StatefulWidget> createState() => GameScreenState(username);
 }
 
 var game = Game();
 
 class GameScreenState extends State<GameScreen> {
+  GameScreenState(this.username);
+  final String username;
+
   Set highlighted = {};
   (int, int)? selected;
   (int, int)? previousMove;
@@ -86,7 +91,7 @@ class GameScreenState extends State<GameScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("ABCs' Chess Game!"),
+          title: Text("Welcome " + username + "!"),
         ),
         body: Column(children: [
           const Spacer(),

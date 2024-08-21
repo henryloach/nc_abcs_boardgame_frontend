@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
+import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        // currently home -> game screen; change to home screen at some point
-        home: GameScreen());
+        home: LoginScreen());
   }
 }
