@@ -234,6 +234,13 @@ void main() {
 
         expect(game.getLegalMoves((7, 7)), expectedResult);
       });
+      test("pawn can't move if it's pinned", () {
+        final game = Game(fenString: "7q/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+        Set expectedResult = {};
+
+        expect(game.getLegalMoves((6, 1)), expectedResult);
+      });
     });
   });
 
@@ -249,7 +256,7 @@ void main() {
       expect(game.board, expectedPosition);
     });
 
-        test("e4 e5", () {
+    test("e4 e5", () {
       final game = Game();
 
       final expectedPosition = decodeFEN(
@@ -259,6 +266,71 @@ void main() {
       game.movePiece((1, 4), (3, 4));
 
       expect(game.board, expectedPosition);
+    });
+  });
+
+  group("testForChecks()", () {
+    test("king attacked by one piece", () {
+      final game = Game(fenString: "7q/8/8/8/8/8/8/K7 w - - 0 1");
+
+      const expectedResult = {
+        (0, 7),
+      };
+
+      expect(game.testBoardForChecks(), expectedResult);
+    });
+    test("king attacked by miltiple pieces", () {
+      final game = Game(fenString: "q6q/8/8/8/8/8/8/K6q w - - 0 1");
+
+      const expectedResult = {
+        (0, 0),
+        (0, 7),
+        (7, 7),
+      };
+
+      expect(game.testBoardForChecks(), expectedResult);
+    });
+  });
+
+  group("testMoveForOpposingChecks", () {
+    test("board is the same after the function runs", () {
+      final game = Game(fenString: "6q1/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+      final expectedBoard = decodeFEN("6q1/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+      game.testMoveForOpposingChecks((7, 0), (6, 0));
+
+      expect(game.board, expectedBoard);
+    });
+
+    test("returns true for king attempting to move into check", () {
+      final game = Game(fenString: "6q1/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+      expect(game.testMoveForOpposingChecks((7, 0), (6, 0)), true);
+    });
+
+    test("returns true for pinned pawn attempting to advance", () {
+      final game = Game(fenString: "7q/8/8/8/8/8/1P6/K7 w - - 0 1");
+
+      expect(game.testMoveForOpposingChecks((6, 1), (5, 1)), true);
+    });
+
+    test("returns false for bishop moving along the line of pin", () {
+      final game = Game(fenString: "7q/8/8/8/8/8/1B6/K7 w - - 0 1");
+
+      expect(game.testMoveForOpposingChecks((6, 1), (4, 3)), false);
+    });
+
+    test("doesn't prevent own discovered check", () {
+      final game = Game(fenString: "3kq3/8/8/8/8/8/3K4/3Q4 w - - 0 1");
+
+      expect(game.testMoveForOpposingChecks((6, 3), (6, 2)), false);
+    });
+
+    test("doesn't prevent attcking opponents king", () {
+      final game = Game(fenString: "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR w KQkq - 0 1");
+
+      expect(game.testMoveForOpposingChecks((0, 3), (4, 7)), false);
     });
   });
 }
