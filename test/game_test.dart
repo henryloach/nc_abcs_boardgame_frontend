@@ -315,9 +315,67 @@ void main() {
     });
 
     test("doesn't prevent attcking opponents king", () {
-      final game = Game(fenString: "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR w KQkq - 0 1");
+      final game = Game(
+          fenString:
+              "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR w KQkq - 0 1");
 
       expect(game.testMoveForOpposingChecks((0, 3), (4, 7)), false);
+    });
+  });
+
+  group("testForWinCondition()", () {
+    test("back rank-checkmate", () {
+      final game = Game(fenString: "k3q3/8/8/8/8/8/PPP5/K7 b - - 0 1");
+      game.movePiece((0, 4), (7, 4));
+      expect(game.gameState, GameState.blackWin);
+    });
+
+    test("problem position from emulator test", () {
+      final game = Game(
+          fenString:
+              "r1bqk1nr/p2nbppp/1p6/1Bp1P3/4PP2/6P1/P2B3P/R2QK2R w - - 0 1");
+      game.movePiece((3, 1), (3, 1));
+      expect(game.gameState, GameState.blackToMove);
+    });
+  });
+
+  group("isActivePlayerInCheck()", () {
+    test("returns true if in check", () {
+      final game = Game(fenString: "3kq3/8/8/8/8/8/8/4K3 w - - 0 1");
+
+      expect(game.isActivePlayerInCheck(), true);
+    });
+    test("returns false if not in check", () {
+      final game = Game();
+
+      expect(game.isActivePlayerInCheck(), false);
+    });
+  });
+
+  group("getAllActivePlayerLegalMoves()", () {
+    test("white's starting position legal moves", () {
+      final game = Game();
+
+      const expectedResult = {
+        (5, 0),
+        (5, 1),
+        (5, 2),
+        (5, 3),
+        (5, 4),
+        (5, 5),
+        (5, 6),
+        (5, 7),
+        (4, 0),
+        (4, 1),
+        (4, 2),
+        (4, 3),
+        (4, 4),
+        (4, 5),
+        (4, 6),
+        (4, 7),
+      };
+
+      expect(game.getAllActivePlayerLegalMoves(), expectedResult);
     });
   });
 }

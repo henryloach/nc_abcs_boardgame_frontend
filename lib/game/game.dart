@@ -12,8 +12,6 @@ class Game {
 
   GameState gameState = GameState.whiteToMove;
 
-  Set<(int, int)> checks = {};
-
   // Constructor with an optional named parameter for the FEN string
   Game(
       {String fenString =
@@ -33,6 +31,7 @@ class Game {
   // safety of this function relies on args coming from legal move set.
   // This function has no restrictions on what can be moved where.
   void movePiece((int, int) moveFromSquare, (int, int) moveToSquare) {
+
     final (startRow, startColumn) = moveFromSquare;
     final (endRow, endColumn) = moveToSquare;
     final ChessPiece? piece = board[startRow][startColumn];
@@ -48,15 +47,18 @@ class Game {
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
-    checks = testBoardForChecks();
+    //checks = testBoardForChecks();
 
     swapTurn();
+
+    testForWinCondition();
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
     final (row, column) = square;
     final ChessPiece? piece = board[row][column];
 
+    // returns the subset of legal moves for a single direction of movement
     Set<(int, int)> seek(
       (int, int) direction,
       bool canRepeat,
@@ -137,7 +139,9 @@ class Game {
     for (var row = 0; row < board.length; row++) {
       for (var column = 0; column < board[0].length; column++) {
         final piece = board[row][column];
-        gameState = piece != null && piece.colour == PieceColour.white ? GameState.whiteToMove : GameState.blackToMove;
+        gameState = piece != null && piece.colour == PieceColour.white
+            ? GameState.whiteToMove
+            : GameState.blackToMove;
         final moves = getLegalMoves((row, column), testCheck: false);
         if (moves.any(
           (move) {
@@ -152,12 +156,13 @@ class Game {
         }
       }
     }
+    // revert to the pre-function gameState
     gameState = initial;
     return checks;
   }
 
   void swapTurn() {
-   if (gameState == GameState.blackToMove) {
+    if (gameState == GameState.blackToMove) {
       gameState = GameState.whiteToMove;
     } else if (gameState == GameState.whiteToMove) {
       gameState = GameState.blackToMove;
@@ -175,8 +180,6 @@ class Game {
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
-    swapTurn();
-
     final checks = testBoardForChecks();
 
     // remove this move
@@ -186,12 +189,57 @@ class Game {
     board[startRow][startColumn] = piece;
     board[endRow][endColumn] = target;
 
-    swapTurn();
-
     return checks.any((check) {
       final checkingPiece = board[check.$1][check.$2];
       return checkingPiece!.colour != piece!.colour;
     });
+  }
+
+  Set<(int, int)> getAllActivePlayerLegalMoves() {
+    Set<(int, int)> resultSet = {};
+    for (var row = 0; row < board.length; row++) {
+      for (var column = 0; column < board[0].length; column++) {
+        final piece = board[row][column];
+
+        if (piece == null) continue;
+
+        if (piece.colour == PieceColour.white &&
+            gameState == GameState.whiteToMove) {
+          resultSet.addAll(getLegalMoves((row, column)));
+        }
+        if (piece.colour == PieceColour.black &&
+            gameState == GameState.blackToMove) {
+          resultSet.addAll(getLegalMoves((row, column)));
+        }
+      }
+    }
+    return resultSet;
+  }
+
+  bool isActivePlayerInCheck() {
+    for (final square in testBoardForChecks()) {
+      final (row, column) = square;
+      if (board[row][column]!.colour == PieceColour.white &&
+          gameState == GameState.blackToMove) {
+        return true;
+      }
+      if (board[row][column]!.colour == PieceColour.black &&
+          gameState == GameState.whiteToMove) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void testForWinCondition() {
+    if (getAllActivePlayerLegalMoves().isNotEmpty) return;
+    if (isActivePlayerInCheck() && gameState == GameState.blackToMove) {
+      gameState = GameState.whiteWin;
+    } else if (isActivePlayerInCheck() && gameState == GameState.whiteToMove) {
+      gameState = GameState.blackWin;
+    } else {
+      gameState = GameState.draw;
+    }
   }
 }
 
