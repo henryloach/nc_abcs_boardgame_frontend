@@ -12,12 +12,37 @@ class GameScreen extends StatefulWidget {
 
 var game = Game();
 
+class Promo {
+  bool isMenuOpen;
+  int? row;
+  int? column;
+  String? player;
+
+  Promo({this.isMenuOpen = false, this.row, this.column, this.player});
+}
+
 class GameScreenState extends State<GameScreen> {
   Set highlighted = {};
   (int, int)? selected;
   (int, int)? previousMove;
 
+  Promo promo = Promo();
+
   handleClick(y, x) {
+    final player = game.checkPromotion((y, x));
+    if (player != null) {
+      promo.row = y;
+      promo.column = x;
+      promo.player = player;
+      setState(() {
+        promo.isMenuOpen = true;
+      });
+    } else {
+      setState(() {
+        promo.isMenuOpen = false;
+      });
+    }
+
     setState(() {
       if (selected == null) {
         selected = (y, x);
@@ -99,8 +124,52 @@ class GameScreenState extends State<GameScreen> {
           CapturedWhitePieces(),
           buildChessBoard(),
           CapturedBlackPieces(),
+          if (promo.isMenuOpen) ...[
+            openPromoMenu(),
+          ],
           const Spacer(),
         ]));
+  }
+
+  Container openPromoMenu() {
+    return Container(
+      color: const Color.fromARGB(255, 39, 3, 0),
+      padding: const EdgeInsets.all(30),
+      child: Column(
+        children: [
+          const Text(
+            "Promote pawn to:",
+            style: TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ...["queen", "bishop", "rook", "knight"].map(
+                (pieceType) => Container(
+                  color: Colors.white,
+                  child: IconButton(
+                    onPressed: () {
+                      if (promo.row != null &&
+                          promo.column != null &&
+                          promo.player != null) {
+                        game.promotePawn(promo.row!, promo.column!,
+                            promo.player!, pieceType);
+
+                        setState(() {
+                          promo.isMenuOpen = false;
+                        });
+                      }
+                    },
+                    icon: SvgPicture.asset("assets/svg/black-$pieceType.svg"),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Column buildChessBoard() {
