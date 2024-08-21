@@ -1,4 +1,3 @@
-import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
@@ -19,7 +18,10 @@ class Game {
   Game(
       {String fenString =
           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"})
-      : board = decodeFEN(fenString); // this is an "initializer list"
+      : board = decodeFEN(fenString),
+        gameState = fenString.split(" ")[1] == "w"
+            ? GameState.whiteToMove
+            : GameState.blackToMove; // this is an "initializer list"
 
   String getAssetPathAtSquare((int, int) square) {
     final (row, column) = square;
@@ -48,11 +50,7 @@ class Game {
 
     checks = testBoardForChecks();
 
-    if (gameState == GameState.whiteToMove) {
-      gameState = GameState.blackToMove;
-    } else if (gameState == GameState.blackToMove) {
-      gameState = GameState.whiteToMove;
-    }
+    swapTurn();
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
@@ -134,10 +132,12 @@ class Game {
   }
 
   Set<(int, int)> testBoardForChecks() {
+    GameState initial = gameState;
     Set<(int, int)> checks = {};
     for (var row = 0; row < board.length; row++) {
       for (var column = 0; column < board[0].length; column++) {
         final piece = board[row][column];
+        gameState = piece != null && piece.colour == PieceColour.white ? GameState.whiteToMove : GameState.blackToMove;
         final moves = getLegalMoves((row, column), testCheck: false);
         if (moves.any(
           (move) {
@@ -152,7 +152,16 @@ class Game {
         }
       }
     }
+    gameState = initial;
     return checks;
+  }
+
+  void swapTurn() {
+   if (gameState == GameState.blackToMove) {
+      gameState = GameState.whiteToMove;
+    } else if (gameState == GameState.whiteToMove) {
+      gameState = GameState.blackToMove;
+    }
   }
 
   bool testMoveForOpposingChecks(
@@ -166,6 +175,8 @@ class Game {
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
+    swapTurn();
+
     final checks = testBoardForChecks();
 
     // remove this move
@@ -175,6 +186,8 @@ class Game {
     board[startRow][startColumn] = piece;
     board[endRow][endColumn] = target;
 
+    swapTurn();
+
     return checks.any((check) {
       final checkingPiece = board[check.$1][check.$2];
       return checkingPiece!.colour != piece!.colour;
@@ -183,12 +196,3 @@ class Game {
 }
 
 enum GameState { whiteToMove, blackToMove, whiteWin, blackWin, draw }
-
-
-/*
-
-  intially start with white's turn
-  when white piece moves, change to black's turn
-  when black piece moves, change to white's turn
-
-*/

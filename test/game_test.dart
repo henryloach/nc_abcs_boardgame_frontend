@@ -188,15 +188,6 @@ void main() {
 
         const Set<(int, int)> expectedResult = {};
 
-        // black
-        expect(game.getLegalMoves((0, 0)), expectedResult);
-        expect(game.getLegalMoves((0, 2)), expectedResult);
-        expect(game.getLegalMoves((0, 3)), expectedResult);
-        expect(game.getLegalMoves((0, 4)), expectedResult);
-        expect(game.getLegalMoves((0, 5)), expectedResult);
-        expect(game.getLegalMoves((0, 7)), expectedResult);
-
-        // white
         expect(game.getLegalMoves((7, 0)), expectedResult);
         expect(game.getLegalMoves((7, 2)), expectedResult);
         expect(game.getLegalMoves((7, 3)), expectedResult);
@@ -213,13 +204,9 @@ void main() {
 
         const Set<(int, int)> whiteQueensideKnightMoves = {(5, 0), (5, 2)};
         const Set<(int, int)> whiteKingsideKnightMoves = {(5, 5), (5, 7)};
-        const Set<(int, int)> blackQueensideKnightMoves = {(2, 0), (2, 2)};
-        const Set<(int, int)> blackKingsideKnightMoves = {(2, 5), (2, 7)};
 
         expect(game.getLegalMoves((7, 1)), whiteQueensideKnightMoves);
         expect(game.getLegalMoves((7, 6)), whiteKingsideKnightMoves);
-        expect(game.getLegalMoves((0, 1)), blackQueensideKnightMoves);
-        expect(game.getLegalMoves((0, 6)), blackKingsideKnightMoves);
       });
 
       test(
