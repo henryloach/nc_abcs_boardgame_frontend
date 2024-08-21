@@ -337,6 +337,14 @@ void main() {
       game.movePiece((3, 1), (3, 1));
       expect(game.gameState, GameState.blackToMove);
     });
+
+    test("stalemate", () {
+      final game = Game(fenString: "7r/8/8/8/8/8/7r/K7 b - - 0 1");
+
+      game.movePiece((0,7),(0,1));
+
+      expect(game.gameState, GameState.draw);
+    });
   });
 
   group("isActivePlayerInCheck()", () {
