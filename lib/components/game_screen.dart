@@ -34,7 +34,7 @@ class GameScreenState extends State<GameScreen> {
               SnackBar(
                 content: Text(
                   '${capturedPiece.colour.name} ${capturedPiece.type.name} captured!',
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
@@ -52,7 +52,7 @@ class GameScreenState extends State<GameScreen> {
           if (selected != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
+                content: const Text(
                   'Invalid move!',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -90,7 +90,14 @@ class GameScreenState extends State<GameScreen> {
         ),
         body: Column(children: [
           const Spacer(),
+          if (game.gameState == GameState.whiteToMove) ...[
+            const Text("White's Turn")
+          ] else if (game.gameState == GameState.blackToMove) ...[
+            const Text("Black's Turn")
+          ],
+          CapturedWhitePieces(),
           buildChessBoard(),
+          CapturedBlackPieces(),
           const Spacer(),
         ]));
   }
@@ -98,15 +105,6 @@ class GameScreenState extends State<GameScreen> {
   Column buildChessBoard() {
     return Column(
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ...game.capturedPieces
-              .where((piece) => piece.colour.name == 'white')
-              .map((piece) => SvgPicture.asset(
-                    "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                    height: 25,
-                    width: 25,
-                  ))
-        ]),
         ...(List.generate(
           8,
           (y) => Row(children: [
@@ -138,15 +136,6 @@ class GameScreenState extends State<GameScreen> {
             ),
           ]),
         )),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ...game.capturedPieces
-              .where((piece) => piece.colour.name == 'black')
-              .map((piece) => SvgPicture.asset(
-                    "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                    height: 25,
-                    width: 25,
-                  ))
-        ]),
       ],
     );
   }
@@ -157,5 +146,43 @@ class GameScreenState extends State<GameScreen> {
       val++;
     }
     return val.isEven ? firebrick : lightsalmon;
+  }
+}
+
+class CapturedBlackPieces extends StatelessWidget {
+  const CapturedBlackPieces({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      ...game.capturedPieces
+          .where((piece) => piece.colour.name == 'black')
+          .map((piece) => SvgPicture.asset(
+                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
+                height: 25,
+                width: 25,
+              ))
+    ]);
+  }
+}
+
+class CapturedWhitePieces extends StatelessWidget {
+  const CapturedWhitePieces({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      ...game.capturedPieces
+          .where((piece) => piece.colour.name == 'white')
+          .map((piece) => SvgPicture.asset(
+                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
+                height: 25,
+                width: 25,
+              ))
+    ]);
   }
 }

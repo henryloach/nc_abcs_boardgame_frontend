@@ -1,3 +1,4 @@
+import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
@@ -9,6 +10,8 @@ class Game {
 
   List<List<ChessPiece?>> board;
   List<ChessPiece> capturedPieces = [];
+
+  GameState gameState = GameState.whiteToMove;
 
   Set<(int, int)> checks = {};
 
@@ -24,7 +27,6 @@ class Game {
     if (target == null) return "";
     return target.assetPath;
   }
-
 
   // safety of this function relies on args coming from legal move set.
   // This function has no restrictions on what can be moved where.
@@ -45,6 +47,12 @@ class Game {
     board[startRow][startColumn] = null;
 
     checks = testBoardForChecks();
+
+    if (gameState == GameState.whiteToMove) {
+      gameState = GameState.blackToMove;
+    } else if (gameState == GameState.blackToMove) {
+      gameState = GameState.whiteToMove;
+    }
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
@@ -99,7 +107,11 @@ class Game {
       return resultSet;
     }
 
-    if (piece == null) {
+    if (piece == null ||
+        (gameState == GameState.whiteToMove &&
+            piece.colour == PieceColour.black) ||
+        (gameState == GameState.blackToMove &&
+            piece.colour == PieceColour.white)) {
       return {};
     }
 
@@ -169,3 +181,14 @@ class Game {
     });
   }
 }
+
+enum GameState { whiteToMove, blackToMove, whiteWin, blackWin, draw }
+
+
+/*
+
+  intially start with white's turn
+  when white piece moves, change to black's turn
+  when black piece moves, change to white's turn
+
+*/
