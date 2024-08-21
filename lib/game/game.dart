@@ -23,6 +23,7 @@ class Game {
     return target.assetPath;
   }
 
+
   // safety of this function relies on args coming from legal move set.
   // This function has no restrictions on what can be moved where.
   void movePiece((int, int) moveFromSquare, (int, int) moveToSquare) {
