@@ -89,6 +89,7 @@ class GameScreenState extends State<GameScreen> {
           title: const Text("ABCs' Chess Game!"),
         ),
         body: Column(children: [
+          Text("${game.gameState}"),
           const Spacer(),
           if (game.gameState == GameState.whiteToMove) ...[
             const Text("White's Turn")
