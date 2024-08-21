@@ -74,7 +74,7 @@ class GameScreenState extends State<GameScreen> {
           highlighted = {};
           selected = null;
         } else {
-          if (selected != null) {
+          if (selected != null && selected != (y, x)) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text(
@@ -82,7 +82,7 @@ class GameScreenState extends State<GameScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
                 backgroundColor: Colors.red,
-                duration: const Duration(seconds: 2),
+                duration: const Duration(seconds: 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
