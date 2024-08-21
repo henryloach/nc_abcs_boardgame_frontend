@@ -79,14 +79,35 @@ class Game {
     return null;
   }
 
-  void promotePawn(int y, int x, String toPromote) {
-    final row = y;
-    final column = x;
-    final colour = toPromote;
+  void promotePawn(int y, int x, String player, String promoteTo) {
+    late PieceType type;
+    late PieceColour colour;
 
-    board[row][column] = ChessPiece(PieceType.queen,
-        colour == "white" ? PieceColour.white : PieceColour.black);
-    // change chess piece at (y, x) to queen;
+    switch (promoteTo) {
+      case "queen":
+        type = PieceType.queen;
+        break;
+      case "bishop":
+        type = PieceType.bishop;
+        break;
+      case "rook":
+        type = PieceType.rook;
+        break;
+      case "knight":
+        type = PieceType.knight;
+        break;
+    }
+
+    switch (player) {
+      case "white":
+        colour = PieceColour.white;
+        break;
+      case "black":
+        colour = PieceColour.black;
+        break;
+    }
+
+    board[y][x] = ChessPiece(type, colour);
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
