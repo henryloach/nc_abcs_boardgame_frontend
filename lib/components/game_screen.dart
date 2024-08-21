@@ -18,6 +18,11 @@ class GameScreenState extends State<GameScreen> {
   (int, int)? previousMove;
 
   handleClick(y, x) {
+    final toPromote = game.checkPromotion((y, x));
+    if (toPromote != null) {
+      // print(toPromote);
+      game.promotePawn(y, x, toPromote);
+    }
     setState(() {
       if (selected == null) {
         selected = (y, x);

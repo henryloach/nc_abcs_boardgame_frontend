@@ -52,6 +52,41 @@ class Game {
     swapTurn();
 
     testForWinCondition();
+
+    // check if pawn is at either first row or last row
+    // clicking on the pawn opens a promotion menu: users can select to upgrade it to any other piece
+    // upgrade pawn to the selected piece
+  }
+
+  String? checkPromotion((int, int) square) {
+    final (row, column) = square;
+    // print((row, column));
+
+    final ChessPiece? piece = board[row][column];
+    final pieceType = piece?.type.name;
+    final pieceColour = piece?.colour.name;
+
+    if (pieceType == "pawn" && (row == 0 || row == 7)) {
+      if (gameState == GameState.whiteToMove && pieceColour == "white") {
+        // print("$pieceColour-$pieceType");
+        return "white";
+      } else if (gameState == GameState.blackToMove && pieceColour == "black") {
+        // print("$pieceColour-$pieceType");
+        return "black";
+      }
+    }
+
+    return null;
+  }
+
+  void promotePawn(int y, int x, String toPromote) {
+    final row = y;
+    final column = x;
+    final colour = toPromote;
+
+    board[row][column] = ChessPiece(PieceType.queen,
+        colour == "white" ? PieceColour.white : PieceColour.black);
+    // change chess piece at (y, x) to queen;
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
@@ -99,13 +134,15 @@ class Game {
         // can't move through friendly pieces and can only capture the first opposing piece in the direction of movement
         if (targetPiece != null) {
           if (targetPiece.colour == piece.colour) break;
-          if (captureRule == CaptureRule.moveOnly) break; // pawns can't take forwards
+          if (captureRule == CaptureRule.moveOnly)
+            break; // pawns can't take forwards
 
           resultSet.add((y, x));
 
           break;
         } else {
-          if (captureRule == CaptureRule.captureOnly) break; // pawns can't move diagonaly, only capture 
+          if (captureRule == CaptureRule.captureOnly)
+            break; // pawns can't move diagonaly, only capture
 
           // square is available to move if it's empty
           resultSet.add((y, x));
@@ -235,8 +272,7 @@ class Game {
     // loop over every board square
     for (var row = 0; row < board.length; row++) {
       for (var column = 0; column < board[0].length; column++) {
-
-        // get the piece at that square, continue if square is empty 
+        // get the piece at that square, continue if square is empty
         final piece = board[row][column];
         if (piece == null) continue;
 
