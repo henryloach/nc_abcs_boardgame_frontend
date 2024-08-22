@@ -330,6 +330,13 @@ class Game {
       gameState = GameState.draw;
     }
   }
+
+  bool doesPieceAtSquareBelongToActivePlayer(y,x) {
+    if (board[y][x] == null) return false;
+    if (board[y][x]!.colour == PieceColour.white && gameState == GameState.whiteToMove) return true;
+    if (board[y][x]!.colour == PieceColour.black && gameState == GameState.blackToMove) return true;
+    return false;
+  }
 }
 
 enum GameState { whiteToMove, blackToMove, whiteWin, blackWin, draw }
