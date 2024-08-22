@@ -5,15 +5,12 @@ import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key, required this.username}) : super(key: key);
-
   final String username;
+  const GameScreen({super.key, required this.username});
 
   @override
-  State<StatefulWidget> createState() => GameScreenState(username);
+  State<GameScreen> createState() => _GameScreenState();
 }
-
-var game = Game();
 
 class Promo {
   bool isMenuOpen;
@@ -24,10 +21,8 @@ class Promo {
   Promo({this.isMenuOpen = false, this.row, this.column, this.player});
 }
 
-class GameScreenState extends State<GameScreen> {
-  GameScreenState(this.username);
-  final String username;
-
+class _GameScreenState extends State<GameScreen> {
+  var game = Game();
   Set highlighted = {};
   (int, int)? selected;
   (int, int)? previousMove;
@@ -115,7 +110,7 @@ class GameScreenState extends State<GameScreen> {
         ),
         body: Column(children: [
           const Spacer(),
-          Text("Hello, $username"),
+          Text("Hello, ${widget.username}"),
           const Spacer(),
           Text("${game.gameState}"),
           const Spacer(),
