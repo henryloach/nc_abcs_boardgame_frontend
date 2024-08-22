@@ -78,6 +78,7 @@ class _GameScreenState extends State<GameScreen> {
             showPopup(message: 'Invalid move!', backgroundColor: Colors.red);
             selected = previousMoveStart;
             selected = null;
+            legalMoves = {};
           }
         }
       }
