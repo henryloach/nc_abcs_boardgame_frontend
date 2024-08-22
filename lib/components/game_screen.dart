@@ -86,9 +86,11 @@ class GameScreenState extends State<GameScreen> {
                 behavior: SnackBarBehavior.floating,
               ),
             );
+            selected = previousMove;
+          } else {
+            selected = (y, x);
+            highlighted = game.getLegalMoves((y, x));
           }
-          selected = (y, x);
-          highlighted = game.getLegalMoves((y, x));
         }
       }
     });
