@@ -5,7 +5,7 @@ import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({Key? key, required this.username}) : super(key: key);
-  
+
   final String username;
 
   @override
@@ -34,20 +34,6 @@ class GameScreenState extends State<GameScreen> {
   Promo promo = Promo();
 
   handleClick(y, x) {
-    final player = game.checkPromotion((y, x));
-    if (player != null) {
-      promo.row = y;
-      promo.column = x;
-      promo.player = player;
-      setState(() {
-        promo.isMenuOpen = true;
-      });
-    } else {
-      setState(() {
-        promo.isMenuOpen = false;
-      });
-    }
-
     setState(() {
       if (selected == null) {
         selected = (y, x);
@@ -58,6 +44,12 @@ class GameScreenState extends State<GameScreen> {
 
           ChessPiece? capturedPiece = game.board[y][x];
           game.movePiece(selected!, (y, x));
+
+          if (game.canPromote((y, x))) {
+            promo = Promo(row: y, column: x, isMenuOpen: true);
+          } else {
+            promo = Promo(row: null, column: null, isMenuOpen: false);
+          }
 
           if (capturedPiece != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -116,19 +108,32 @@ class GameScreenState extends State<GameScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text("Welcome " + username + "!"),
+          title: const Text("ABC's Chess"),
         ),
         body: Column(children: [
+          const Spacer(),
+          Text("Hello, $username"),
+          const Spacer(),
           Text("${game.gameState}"),
           const Spacer(),
           if (game.gameState == GameState.whiteToMove) ...[
-            const Text("White's Turn")
+            const Text(
+              "White's Turn",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+            )
           ] else if (game.gameState == GameState.blackToMove) ...[
-            const Text("Black's Turn")
+            const Text(
+              "Black's Turn",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+            )
           ],
+          const Spacer(),
           CapturedWhitePieces(),
+          const Spacer(),
           buildChessBoard(),
+          const Spacer(),
           CapturedBlackPieces(),
+          const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],
@@ -155,12 +160,8 @@ class GameScreenState extends State<GameScreen> {
                   color: Colors.white,
                   child: IconButton(
                     onPressed: () {
-                      if (promo.row != null &&
-                          promo.column != null &&
-                          promo.player != null) {
-                        game.promotePawn(promo.row!, promo.column!,
-                            promo.player!, pieceType);
-
+                      if (promo.row != null && promo.column != null) {
+                        game.promotePawn(promo.row!, promo.column!, pieceType);
                         setState(() {
                           promo.isMenuOpen = false;
                         });
@@ -182,34 +183,36 @@ class GameScreenState extends State<GameScreen> {
       children: [
         ...(List.generate(
           8,
-          (y) => Row(children: [
-            ...List.generate(
-              8,
-              (x) => IconButton(
-                padding: const EdgeInsets.all(0),
-                onPressed: () => handleClick(y, x),
-                icon: Container(
-                  decoration: BoxDecoration(
-                    border: highlighted.contains((y, x))
-                        ? Border.all(color: Colors.black54)
-                        : (previousMove == (y, x)
-                            ? Border.all(color: Colors.blue, width: 3)
-                            : Border.all(color: Colors.black12)),
-                    color: highlighted.contains((y, x))
-                        ? const Color.fromARGB(255, 229, 155, 45)
-                        : buildChessTileColour(x, y),
+          (y) => Row(
+            children: [
+              ...List.generate(
+                8,
+                (x) => IconButton(
+                  padding: const EdgeInsets.all(0),
+                  onPressed: () => handleClick(y, x),
+                  icon: Container(
+                    decoration: BoxDecoration(
+                      border: highlighted.contains((y, x))
+                          ? Border.all(color: Colors.black54)
+                          : (previousMove == (y, x)
+                              ? Border.all(color: Colors.blue, width: 3)
+                              : Border.all(color: Colors.black12)),
+                      color: highlighted.contains((y, x))
+                          ? const Color.fromARGB(255, 229, 155, 45)
+                          : buildChessTileColour(x, y),
+                    ),
+                    width: tileWidth,
+                    height: tileWidth,
+                    child: game.getAssetPathAtSquare((y, x)) != ""
+                        ? SvgPicture.asset(
+                            game.getAssetPathAtSquare((y, x)),
+                          )
+                        : null,
                   ),
-                  width: tileWidth,
-                  height: tileWidth,
-                  child: game.getAssetPathAtSquare((y, x)) != ""
-                      ? SvgPicture.asset(
-                          game.getAssetPathAtSquare((y, x)),
-                        )
-                      : null,
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
         )),
       ],
     );
