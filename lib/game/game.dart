@@ -58,28 +58,16 @@ class Game {
     // upgrade pawn to the selected piece
   }
 
-  String? checkPromotion((int, int) square) {
+  bool canPromote((int, int) square) {
     final (row, column) = square;
-    // print((row, column));
-
     final ChessPiece? piece = board[row][column];
-    final pieceType = piece?.type.name;
-    final pieceColour = piece?.colour.name;
-
-    if (pieceType == "pawn" && (row == 0 || row == 7)) {
-      if (gameState == GameState.whiteToMove && pieceColour == "white") {
-        // print("$pieceColour-$pieceType");
-        return "white";
-      } else if (gameState == GameState.blackToMove && pieceColour == "black") {
-        // print("$pieceColour-$pieceType");
-        return "black";
-      }
+    if (piece?.type.name == "pawn" && (row == 0 || row == 7)) {
+      return true;
     }
-
-    return null;
+    return false;
   }
 
-  void promotePawn(int y, int x, String player, String promoteTo) {
+  void promotePawn(int y, int x, String promoteTo) {
     late PieceType type;
     late PieceColour colour;
 
@@ -97,6 +85,9 @@ class Game {
         type = PieceType.knight;
         break;
     }
+
+    final currentPiece = board[y][x];
+    final player = currentPiece?.colour.name;
 
     switch (player) {
       case "white":
