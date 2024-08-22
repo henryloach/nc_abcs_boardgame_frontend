@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key, required this.username}) : super(key: key);
-
   final String username;
+  const GameScreen({super.key, required this.username});
 
   @override
-  State<StatefulWidget> createState() => GameScreenState(username);
+  State<GameScreen> createState() => _GameScreenState();
 }
-
-var game = Game();
 
 class Promo {
   bool isMenuOpen;
@@ -23,10 +21,8 @@ class Promo {
   Promo({this.isMenuOpen = false, this.row, this.column, this.player});
 }
 
-class GameScreenState extends State<GameScreen> {
-  GameScreenState(this.username);
-  final String username;
-
+class _GameScreenState extends State<GameScreen> {
+  var game = Game();
   Set highlighted = {};
   (int, int)? selected;
   (int, int)? previousMove;
@@ -105,7 +101,7 @@ class GameScreenState extends State<GameScreen> {
   final Color indianred = const Color.fromRGBO(205, 92, 92, 100);
   final Color lightsalmon = const Color.fromRGBO(255, 160, 122, 100);
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -114,7 +110,7 @@ class GameScreenState extends State<GameScreen> {
         ),
         body: Column(children: [
           const Spacer(),
-          Text("Hello, $username"),
+          Text("Hello, ${widget.username}"),
           const Spacer(),
           Text("${game.gameState}"),
           const Spacer(),
@@ -130,7 +126,8 @@ class GameScreenState extends State<GameScreen> {
             )
           ],
           const Spacer(),
-          CapturedWhitePieces(),
+          CapturedPieceDisplay(
+              capturedPieces: game.capturedPieces, colour: PieceColour.black),
           const Spacer(),
           Container(
             decoration: BoxDecoration(
@@ -139,14 +136,15 @@ class GameScreenState extends State<GameScreen> {
                   color: Colors.black.withOpacity(0.5),
                   spreadRadius: 2,
                   blurRadius: 8,
-                  offset: Offset(0, 4), 
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
             child: buildChessBoard(),
           ),
           const Spacer(),
-          CapturedBlackPieces(),
+          CapturedPieceDisplay(
+              capturedPieces: game.capturedPieces, colour: PieceColour.white),
           const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
@@ -154,7 +152,6 @@ class GameScreenState extends State<GameScreen> {
           const Spacer(),
         ]));
   }
-
 
   Container openPromoMenu() {
     return Container(
@@ -254,43 +251,5 @@ class GameScreenState extends State<GameScreen> {
       val++;
     }
     return val.isEven ? firebrick : lightsalmon;
-  }
-}
-
-class CapturedBlackPieces extends StatelessWidget {
-  const CapturedBlackPieces({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      ...game.capturedPieces
-          .where((piece) => piece.colour.name == 'black')
-          .map((piece) => SvgPicture.asset(
-                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                height: 25,
-                width: 25,
-              ))
-    ]);
-  }
-}
-
-class CapturedWhitePieces extends StatelessWidget {
-  const CapturedWhitePieces({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      ...game.capturedPieces
-          .where((piece) => piece.colour.name == 'white')
-          .map((piece) => SvgPicture.asset(
-                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                height: 25,
-                width: 25,
-              ))
-    ]);
   }
 }
