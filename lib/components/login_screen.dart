@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
+
+class LoginScreen extends StatelessWidget {
+  LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+          body: Container(
+              margin: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _header(context),
+                  _input(context),
+                ],
+              ))),
+    );
+  }
+}
+
+_header(context) {
+  return const Column(
+    children: [
+      Text(
+        "Welcome to ABCs' Chess Game!",
+        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    ],
+  );
+}
+
+_input(context) {
+  final controller = TextEditingController();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      TextField(
+        controller: controller,
+        decoration: InputDecoration(
+            hintText: "Username",
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none),
+            fillColor: Colors.purple.withOpacity(0.1),
+            filled: true,
+            prefixIcon: const Icon(Icons.person)),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => GameScreen(username: controller.text)));
+        },
+        style: ElevatedButton.styleFrom(
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Colors.purple,
+        ),
+        child: const Text(
+          "Start the game",
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
+      ),
+    ],
+  );
+}
