@@ -105,7 +105,7 @@ class GameScreenState extends State<GameScreen> {
   final Color indianred = const Color.fromRGBO(205, 92, 92, 100);
   final Color lightsalmon = const Color.fromRGBO(255, 160, 122, 100);
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -132,7 +132,19 @@ class GameScreenState extends State<GameScreen> {
           const Spacer(),
           CapturedWhitePieces(),
           const Spacer(),
-          buildChessBoard(),
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 8,
+                  offset: Offset(0, 4), 
+                ),
+              ],
+            ),
+            child: buildChessBoard(),
+          ),
           const Spacer(),
           CapturedBlackPieces(),
           const Spacer(),
@@ -142,6 +154,7 @@ class GameScreenState extends State<GameScreen> {
           const Spacer(),
         ]));
   }
+
 
   Container openPromoMenu() {
     return Container(
