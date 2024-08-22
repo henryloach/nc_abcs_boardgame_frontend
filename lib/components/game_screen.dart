@@ -219,8 +219,22 @@ class GameScreenState extends State<GameScreen> {
                     width: tileWidth,
                     height: tileWidth,
                     child: game.getAssetPathAtSquare((y, x)) != ""
-                        ? SvgPicture.asset(
-                            game.getAssetPathAtSquare((y, x)),
+                        ? Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3), 
+                                  spreadRadius: 1, 
+                                  blurRadius: 4, 
+                                  offset: Offset(0, 2), 
+                                ),
+                              ],
+                            ),
+                            child: SvgPicture.asset(
+                              game.getAssetPathAtSquare((y, x)),
+                              height: tileWidth,
+                              width: tileWidth,
+                            ),
                           )
                         : null,
                   ),
@@ -232,6 +246,7 @@ class GameScreenState extends State<GameScreen> {
       ],
     );
   }
+
 
   Color buildChessTileColour(int x, int y) {
     int val = x;
