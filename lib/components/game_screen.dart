@@ -1,109 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nc_abcs_boardgame_frontend/components/board.dart';
+import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
+import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key, required this.username}) : super(key: key);
-
   final String username;
+  const GameScreen({super.key, required this.username});
 
   @override
-  State<StatefulWidget> createState() => GameScreenState(username);
+  State<GameScreen> createState() => _GameScreenState();
 }
 
-var game = Game();
-
-class Promo {
-  bool isMenuOpen;
-  int? row;
-  int? column;
-  String? player;
-
-  Promo({this.isMenuOpen = false, this.row, this.column, this.player});
-}
-
-class GameScreenState extends State<GameScreen> {
-  GameScreenState(this.username);
-  final String username;
-
-  Set highlighted = {};
-  (int, int)? selected;
-  (int, int)? previousMove;
+class _GameScreenState extends State<GameScreen> {
+  var game = Game();
 
   Promo promo = Promo();
 
-  handleClick(y, x) {
+  void _setPromo(Promo newPromo) {
     setState(() {
-      if (selected == null) {
-        selected = (y, x);
-        highlighted = game.getLegalMoves((y, x));
-      } else {
-        if (highlighted.contains((y, x))) {
-          previousMove = selected;
-
-          ChessPiece? capturedPiece = game.board[y][x];
-          game.movePiece(selected!, (y, x));
-
-          if (game.canPromote((y, x))) {
-            promo = Promo(row: y, column: x, isMenuOpen: true);
-          } else {
-            promo = Promo(row: null, column: null, isMenuOpen: false);
-          }
-
-          if (capturedPiece != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${capturedPiece.colour.name} ${capturedPiece.type.name} captured!',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-
-          highlighted = {};
-          selected = null;
-        } else {
-          if (selected != null && selected != (y, x)) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  'Invalid move!',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-            selected = previousMove;
-          } else {
-            selected = (y, x);
-            highlighted = game.getLegalMoves((y, x));
-          }
-        }
-      }
+      promo = newPromo;
     });
   }
-
-  late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
-  // colours from https://www.rapidtables.com/web/color/blue-color.html
-  final Color deepskyblue = const Color.fromRGBO(0, 191, 255, 100);
-  final Color aliceblue = const Color.fromRGBO(240, 248, 255, 100);
-  final Color lightblue = const Color.fromRGBO(173, 216, 230, 100);
-  final Color firebrick = const Color.fromRGBO(178, 34, 34, 100);
-  final Color indianred = const Color.fromRGBO(205, 92, 92, 100);
-  final Color lightsalmon = const Color.fromRGBO(255, 160, 122, 100);
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +34,7 @@ class GameScreenState extends State<GameScreen> {
         ),
         body: Column(children: [
           const Spacer(),
-          Text("Hello, $username"),
+          Text("Hello, ${widget.username}"),
           const Spacer(),
           Text("${game.gameState}"),
           const Spacer(),
@@ -130,11 +50,28 @@ class GameScreenState extends State<GameScreen> {
             )
           ],
           const Spacer(),
-          CapturedWhitePieces(),
+          CapturedPieceDisplay(
+              capturedPieces: game.capturedPieces, colour: PieceColour.black),
           const Spacer(),
-          buildChessBoard(),
+          Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Board(
+                game: game,
+                promo: promo,
+                setPromo: _setPromo,
+              )),
           const Spacer(),
-          CapturedBlackPieces(),
+          CapturedPieceDisplay(
+              capturedPieces: game.capturedPieces, colour: PieceColour.white),
           const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
@@ -178,91 +115,5 @@ class GameScreenState extends State<GameScreen> {
         ],
       ),
     );
-  }
-
-  Column buildChessBoard() {
-    return Column(
-      children: [
-        ...(List.generate(
-          8,
-          (y) => Row(
-            children: [
-              ...List.generate(
-                8,
-                (x) => IconButton(
-                  padding: const EdgeInsets.all(0),
-                  onPressed: () => handleClick(y, x),
-                  icon: Container(
-                    decoration: BoxDecoration(
-                      border: highlighted.contains((y, x))
-                          ? Border.all(color: Colors.black54)
-                          : (previousMove == (y, x)
-                              ? Border.all(color: Colors.blue, width: 3)
-                              : Border.all(color: Colors.black12)),
-                      color: highlighted.contains((y, x))
-                          ? const Color.fromARGB(255, 229, 155, 45)
-                          : buildChessTileColour(x, y),
-                    ),
-                    width: tileWidth,
-                    height: tileWidth,
-                    child: game.getAssetPathAtSquare((y, x)) != ""
-                        ? SvgPicture.asset(
-                            game.getAssetPathAtSquare((y, x)),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )),
-      ],
-    );
-  }
-
-  Color buildChessTileColour(int x, int y) {
-    int val = x;
-    if (y.isEven) {
-      val++;
-    }
-    return val.isEven ? firebrick : lightsalmon;
-  }
-}
-
-class CapturedBlackPieces extends StatelessWidget {
-  const CapturedBlackPieces({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      ...game.capturedPieces
-          .where((piece) => piece.colour.name == 'black')
-          .map((piece) => SvgPicture.asset(
-                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                height: 25,
-                width: 25,
-              ))
-    ]);
-  }
-}
-
-class CapturedWhitePieces extends StatelessWidget {
-  const CapturedWhitePieces({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      ...game.capturedPieces
-          .where((piece) => piece.colour.name == 'white')
-          .map((piece) => SvgPicture.asset(
-                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                height: 25,
-                width: 25,
-              ))
-    ]);
   }
 }
