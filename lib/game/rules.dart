@@ -51,3 +51,13 @@ const Map moveRuleMap = {
     [(1, -1), false, CaptureRule.captureOnly],
   ]
 };
+
+enum GameVariant {
+  normal,
+  horde,
+}
+
+const Map gameVariantFenMap = {
+  GameVariant.normal: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  GameVariant.horde : "rnbqkbnr/pppppppp/8/8/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP b kq - 0 1"
+};

@@ -19,6 +19,12 @@ class _GameScreenState extends State<GameScreen> {
 
   Promo promo = Promo();
 
+  void _setPromo(Promo newPromo) {
+    setState(() {
+      promo = newPromo;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +67,7 @@ class _GameScreenState extends State<GameScreen> {
               child: Board(
                 game: game,
                 promo: promo,
+                setPromo: _setPromo,
               )),
           const Spacer(),
           CapturedPieceDisplay(
