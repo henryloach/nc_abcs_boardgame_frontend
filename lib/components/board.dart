@@ -26,6 +26,7 @@ class _BoardState extends State<Board> {
   (int, int)? selected;
   (int, int)? previousMoveStart;
   (int, int)? previousMoveEnd;
+
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
 
   handleClick(y, x) {
@@ -45,6 +46,7 @@ class _BoardState extends State<Board> {
 
           previousMoveStart = selected;
           previousMoveEnd = (y, x);
+
           widget.game.movePiece(selected!, (y, x));
           checkers = widget.game.getChecks('attackers');
           checkees = widget.game.getChecks('kings');
@@ -117,32 +119,28 @@ class _BoardState extends State<Board> {
                 padding: const EdgeInsets.all(0),
                 onPressed: () => handleClick(y, x),
                 icon: Container(
-                  decoration: BoxDecoration(
-                    border: getSquareBorder(y, x),
-                    color: getSquareColor(y, x),
-                  ),
-                  width: tileWidth,
-                  height: tileWidth,
-                  child: widget.game.getAssetPathAtSquare((y, x)) != ""
-                      ? Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                spreadRadius: 1,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: SvgPicture.asset(
-                            widget.game.getAssetPathAtSquare((y, x)),
-                            height: tileWidth,
-                            width: tileWidth,
-                          ),
-                        )
-                      : null,
-                ),
+                    decoration: BoxDecoration(
+                      border: getSquareBorder(y, x),
+                      color: getSquareColor(y, x),
+                    ),
+                    width: tileWidth,
+                    height: tileWidth,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return ScaleTransition(scale: animation, child: child);
+                      },
+                      child: widget.game.getAssetPathAtSquare((y, x)) != ""
+                          ? SvgPicture.asset(
+                              widget.game.getAssetPathAtSquare((y, x)),
+                              height: tileWidth,
+                              width: tileWidth,
+                              key: ValueKey(
+                                  widget.game.getAssetPathAtSquare((y, x))),
+                            )
+                          : null,
+                    )),
               ),
             ),
           ],
@@ -165,7 +163,7 @@ class _BoardState extends State<Board> {
     if ((y, x) == previousMoveEnd || (y, x) == previousMoveStart) {
       return Border.all(color: Colors.blue, width: 3);
     }
-    if (checkers.contains((y,x)) || checkees.contains((y,x))) {
+    if (checkers.contains((y, x)) || checkees.contains((y, x))) {
       return Border.all(color: Colors.red, width: 3);
     }
     if (legalMoves.contains((y, x))) {
