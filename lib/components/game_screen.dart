@@ -36,22 +36,13 @@ class _GameScreenState extends State<GameScreen> {
           const Spacer(),
           Text("Hello, ${widget.username}"),
           const Spacer(),
-          Text("${game.gameState}"),
-          const Spacer(),
-          if (game.gameState == GameState.whiteToMove) ...[
-            const Text(
-              "White's Turn",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-            )
-          ] else if (game.gameState == GameState.blackToMove) ...[
-            const Text(
-              "Black's Turn",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-            )
-          ],
+          Text(
+            '${gameStateMessageMap[game.gameState]}',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+          ),
           const Spacer(),
           CapturedPieceDisplay(
-              capturedPieces: game.capturedPieces, colour: PieceColour.black),
+              capturedPieces: game.capturedPieces, colour: PieceColour.white),
           const Spacer(),
           Container(
               decoration: BoxDecoration(
@@ -71,11 +62,18 @@ class _GameScreenState extends State<GameScreen> {
               )),
           const Spacer(),
           CapturedPieceDisplay(
-              capturedPieces: game.capturedPieces, colour: PieceColour.white),
+              capturedPieces: game.capturedPieces, colour: PieceColour.black),
           const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  game = Game();
+                });
+              },
+              child: const Text('Reset')),
           const Spacer(),
         ]));
   }
@@ -117,3 +115,11 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 }
+
+Map<GameState, String> gameStateMessageMap = {
+  GameState.whiteToMove: 'White To Move',
+  GameState.blackToMove: 'Black To Move',
+  GameState.whiteWin: 'White Wins!',
+  GameState.blackWin: 'Black Wins!',
+  GameState.draw: 'Draw',
+};
