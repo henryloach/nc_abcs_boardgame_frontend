@@ -21,6 +21,8 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   Set legalMoves = {};
+  Set checkers = {};
+  Set checkees = {};
   (int, int)? selected;
   (int, int)? previousMoveStart;
   (int, int)? previousMoveEnd;
@@ -44,6 +46,8 @@ class _BoardState extends State<Board> {
           previousMoveStart = selected;
           previousMoveEnd = (y, x);
           widget.game.movePiece(selected!, (y, x));
+          checkers = widget.game.getChecks('attackers');
+          checkees = widget.game.getChecks('kings');
 
           if (widget.game.canPromote((y, x))) {
             widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
@@ -160,6 +164,9 @@ class _BoardState extends State<Board> {
   getSquareBorder(y, x) {
     if ((y, x) == previousMoveEnd || (y, x) == previousMoveStart) {
       return Border.all(color: Colors.blue, width: 3);
+    }
+    if (checkers.contains((y,x)) || checkees.contains((y,x))) {
+      return Border.all(color: Colors.red, width: 3);
     }
     if (legalMoves.contains((y, x))) {
       return Border.all(color: Colors.black54);
