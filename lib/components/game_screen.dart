@@ -5,6 +5,7 @@ import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dar
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
+import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
@@ -18,6 +19,29 @@ class _GameScreenState extends State<GameScreen> {
   var game = Game();
 
   Promo promo = Promo();
+    final WebSocketService _webSocketService = WebSocketService();
+
+  @override
+  void initState() {
+    super.initState();
+    _webSocketService.onMessageReceived = (message) {
+      _handleIncomingMessage(message);
+    };
+  }
+
+  void _handleIncomingMessage(String message) {
+    if (message.startsWith("move:")) {
+      var [startY, startX, endY, endX] = message
+          .substring(5)
+          .split(',')
+          .map((stringNum) => int.parse(stringNum))
+          .toList();
+      // Update the game state with the new move
+      setState(() {
+        game.movePiece((startY, startX), (endY, endX));
+      });
+    }
+  }
 
   void _setPromo(Promo newPromo) {
     setState(() {

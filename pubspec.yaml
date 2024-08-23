@@ -38,6 +38,7 @@ dependencies:
   flutter_hooks: ^0.20.5
   flutter_svg: ^2.0.10+1
   drop_shadow: ^0.1.0
+  web_socket_channel: ^3.0.1
 
 
 dev_dependencies:

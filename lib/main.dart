@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

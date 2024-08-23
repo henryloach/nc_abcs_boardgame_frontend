@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
+import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
+
+  final WebSocketService _webSocketService = WebSocketService();
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +17,7 @@ class LoginScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _header(context),
-                  _input(context),
+                  _input(context, _webSocketService),
                 ],
               ))),
     );
@@ -33,7 +36,7 @@ _header(context) {
   );
 }
 
-_input(context) {
+_input(context, webSocketService) {
   final controller = TextEditingController();
 
   return Column(
@@ -55,6 +58,7 @@ _input(context) {
       ),
       ElevatedButton(
         onPressed: () {
+          webSocketService.sendMessage('user:${controller.text}');
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -73,3 +77,14 @@ _input(context) {
     ],
   );
 }
+
+
+// move: move
+// or
+// username:  
+// or
+// action: resign / offerDraw
+
+// [command, payload] = message.split(":")
+
+// if (command == move)  

@@ -4,6 +4,7 @@ import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/custom_colors.dart';
+import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 
 class Board extends StatefulWidget {
   final Game game;
@@ -20,6 +21,8 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> {
+  final WebSocketService _webSocketService = WebSocketService();
+
   Set legalMoves = {};
   Set checkers = {};
   Set checkees = {};
@@ -47,7 +50,10 @@ class _BoardState extends State<Board> {
           previousMoveStart = selected;
           previousMoveEnd = (y, x);
 
-          widget.game.movePiece(selected!, (y, x));
+          // widget.game.movePiece(selected!, (y, x));
+          _webSocketService
+              .sendMessage('move:${selected!.$1},${selected!.$2},$y,$x');
+
           checkers = widget.game.getChecks('attackers');
           checkees = widget.game.getChecks('kings');
 
