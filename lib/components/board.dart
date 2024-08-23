@@ -21,6 +21,8 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   Set legalMoves = {};
+  Set checkers = {};
+  Set checkees = {};
   (int, int)? selected;
   (int, int)? previousMoveStart;
   (int, int)? previousMoveEnd;
@@ -43,6 +45,17 @@ class _BoardState extends State<Board> {
 
           previousMoveStart = selected;
           previousMoveEnd = (y, x);
+          
+          widget.game.movePiece(selected!, (y, x));
+          checkers = widget.game.getChecks('attackers');
+          checkees = widget.game.getChecks('kings');
+
+          if (widget.game.canPromote((y, x))) {
+            widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
+          } else {
+            widget.setPromo(Promo(row: null, column: null, isMenuOpen: false));
+          }
+
 
           if (target != null) {
             setState(() {
@@ -120,16 +133,25 @@ class _BoardState extends State<Board> {
   }
 
   getSquareColor(y, x) {
-    return legalMoves.contains((y, x))
-        ? const Color.fromARGB(255, 229, 155, 45)
-        : buildChessTileColour(x, y);
+    if ((y, x) == selected) {
+      return const Color.fromARGB(218, 209, 91, 12);
+    }
+    if (legalMoves.contains((y, x))) {
+      return const Color.fromARGB(180, 229, 155, 10);
+    }
+    return buildChessTileColour(x, y);
   }
 
   getSquareBorder(y, x) {
-    return legalMoves.contains((y, x))
-        ? Border.all(color: Colors.black54)
-        : (previousMoveEnd == (y, x)
-            ? Border.all(color: Colors.blue, width: 3)
-            : Border.all(color: Colors.black12));
+    if ((y, x) == previousMoveEnd || (y, x) == previousMoveStart) {
+      return Border.all(color: Colors.blue, width: 3);
+    }
+    if (checkers.contains((y,x)) || checkees.contains((y,x))) {
+      return Border.all(color: Colors.red, width: 3);
+    }
+    if (legalMoves.contains((y, x))) {
+      return Border.all(color: Colors.black54);
+    }
+    return Border.all(color: Colors.black12);
   }
 }

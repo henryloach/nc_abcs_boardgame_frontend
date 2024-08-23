@@ -256,15 +256,20 @@ void main() {
     });
   });
 
-  group("testForChecks()", () {
+  group("getChecks()", () {
     test("king attacked by one piece", () {
       final game = Game(fenString: "7q/8/8/8/8/8/8/K7 w - - 0 1");
 
-      const expectedResult = {
+      const expectedAttackers = {
         (0, 7),
       };
 
-      expect(game.testBoardForChecks(), expectedResult);
+      const expectedKingsInCheck = {
+        (7, 0),
+      };
+
+      expect(game.getChecks("attackers"), expectedAttackers);
+      expect(game.getChecks('kings'), expectedKingsInCheck);
     });
     test("king attacked by miltiple pieces", () {
       final game = Game(fenString: "q6q/8/8/8/8/8/8/K6q w - - 0 1");
@@ -275,7 +280,7 @@ void main() {
         (7, 7),
       };
 
-      expect(game.testBoardForChecks(), expectedResult);
+      expect(game.getChecks('attackers'), expectedResult);
     });
   });
 

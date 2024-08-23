@@ -9,6 +9,8 @@ class Game {
 
   List<List<ChessPiece?>> board;
   List<ChessPiece> capturedPieces = [];
+  // added this state for en-passant
+  (int, int)? previousTo;
 
   GameState gameState = GameState.whiteToMove;
 
@@ -37,13 +39,36 @@ class Game {
     final ChessPiece? piece = board[startRow][startColumn];
     final ChessPiece? target = board[endRow][endColumn];
 
+    final (int, int) move = (
+      moveToSquare.$1 - moveFromSquare.$1,
+      moveToSquare.$2 - moveFromSquare.$2
+    );
+
     // capture opponent's (or maybe your own) piece at the end square if one's there;
     if (target != null) {
       capturedPieces.add(target);
     }
 
+    // en-passant's capture
+    if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
+      final ChessPiece? left = board[moveFromSquare.$1][moveFromSquare.$2 - 1];
+      final ChessPiece? right = board[moveFromSquare.$1][moveFromSquare.$2 + 1];
+
+      if (left != null) {
+        capturedPieces.add(left);
+        board[moveFromSquare.$1][moveFromSquare.$2 - 1] = null;
+      }
+
+      if (right != null) {
+        capturedPieces.add(right);
+        board[moveFromSquare.$1][moveFromSquare.$2 + 1] = null;
+      }
+    }
+
     // move selected piece to the end square;
-    piece!.hasMoved = true;
+    piece.hasMoved = true;
+    piece.previousMove = move;
+    previousTo = moveToSquare;
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
@@ -132,7 +157,7 @@ class Game {
       if (piece!.colour == PieceColour.white) dy = -dy;
 
       do {
-        // get the coordianted of the considered move
+        // get the coordinates of the considered move
         y = y + dy;
         x = x + dx;
 
@@ -165,6 +190,42 @@ class Game {
               board[y + dy][x + dx] == null) {
             resultSet.add((y + dy, x + dx));
           }
+
+          // "en passant"
+          // notes:
+          // the type of each piece
+          // the previous move for each piece (store this against the piece)
+          // validMoves: (for a pawn)
+          // check if the piece to the left or right is a pawn, and has a previous move of y +/- 2
+          // movePiece:
+          // [x] for a pawn
+          // [x] check if the move is diagonal and there is no piece in the square
+          // [x] check for a piece at y +/- 1 and capture that instead
+
+          if (piece.type == PieceType.pawn) {
+            // vm = vertical move
+            final vm = piece.colour == PieceColour.white ? -1 : 1;
+            final ChessPiece? left = column > 0 ? board[row][column - 1] : null;
+            final ChessPiece? right =
+                column < 7 ? board[row][column + 1] : null;
+
+            if (left?.type == PieceType.pawn && // is it a pawn?
+                left?.colour != piece.colour && // is it not your pawn?
+                previousTo ==
+                    (row, column - 1) && // was it the last piece to move?
+                (left?.previousMove?.$1 == 2 || left?.previousMove?.$1 == -2)) {
+              // did it move by 2?
+              resultSet.add((row + vm, column - 1));
+            }
+
+            if (right?.type == PieceType.pawn &&
+                right?.colour != piece.colour &&
+                previousTo == (row, column + 1) &&
+                (right?.previousMove?.$1 == 2 ||
+                    right?.previousMove?.$1 == -2)) {
+              resultSet.add((row + vm, column + 1));
+            }
+          }
         }
       } while (canRepeat);
 
@@ -193,6 +254,7 @@ class Game {
 
     // remove moves that would result in placing your own king in check
     if (testCheck) {
+      // <-- enable this again
       legalMoves.removeWhere((targetSquare) {
         return testMoveForOpposingChecks(square, targetSquare);
       });
@@ -202,7 +264,8 @@ class Game {
     return legalMoves;
   }
 
-  Set<(int, int)> testBoardForChecks() {
+  // get Checking Pieces
+  Set<(int, int)> getChecks(option) {
     // save the inital gamestate to remeber who's turn it was
     GameState initial = gameState;
 
@@ -214,26 +277,30 @@ class Game {
       for (var column = 0; column < board[0].length; column++) {
         // get the piece(or null) at each square
         final piece = board[row][column];
+        if (piece == null) continue;
 
         // set the gamestate to that pieces color to allow the getLegalMoves function to work
-        gameState = piece != null && piece.colour == PieceColour.white
+        gameState = piece.colour == PieceColour.white
             ? GameState.whiteToMove
             : GameState.blackToMove;
 
         // get the legal moves of the piece
         final moves = getLegalMoves((row, column), testCheck: false);
 
-        // if any of the legal moves attack an oppsing king then add that move to the set
-        if (moves.any(
-          (move) {
-            final (y, x) = move;
-            final target = board[y][x];
-            return target != null &&
-                target.type == PieceType.king &&
-                target.colour != piece!.colour;
-          },
-        )) {
-          checks.add((row, column));
+        // if any of the legal moves attack an oppsing king then add that piece to the set
+        // or the king if that option is chosen
+        for (final move in moves) {
+          final (y, x) = move;
+          final target = board[y][x];
+          if (target == null) continue;
+          if (target.type == PieceType.king && target.colour != piece.colour) {
+            if (option == "kings") {
+              checks.add((y, x));
+            }
+            if (option == "attackers") {
+              checks.add((row, column));
+            }
+          }
         }
       }
     }
@@ -263,7 +330,7 @@ class Game {
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
-    final checks = testBoardForChecks();
+    final checks = getChecks('attackers');
 
     // remove this move
     checks.remove(moveToSquare);
@@ -304,7 +371,7 @@ class Game {
 
   bool isActivePlayerInCheck() {
     // get all the checks and return true if the attacked king is of the active palyer
-    for (final square in testBoardForChecks()) {
+    for (final square in getChecks('attackers')) {
       final (row, column) = square;
       if (board[row][column]!.colour == PieceColour.white &&
           gameState == GameState.blackToMove) {
@@ -331,10 +398,12 @@ class Game {
     }
   }
 
-  bool doesPieceAtSquareBelongToActivePlayer(y,x) {
+  bool doesPieceAtSquareBelongToActivePlayer(y, x) {
     if (board[y][x] == null) return false;
-    if (board[y][x]!.colour == PieceColour.white && gameState == GameState.whiteToMove) return true;
-    if (board[y][x]!.colour == PieceColour.black && gameState == GameState.blackToMove) return true;
+    if (board[y][x]!.colour == PieceColour.white &&
+        gameState == GameState.whiteToMove) return true;
+    if (board[y][x]!.colour == PieceColour.black &&
+        gameState == GameState.blackToMove) return true;
     return false;
   }
 }
