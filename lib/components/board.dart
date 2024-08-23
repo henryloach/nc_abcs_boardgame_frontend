@@ -147,17 +147,23 @@ class _BoardState extends State<Board> {
     );
   }
 
-  getSquareColor(y,x) {
-    return legalMoves.contains((y, x))
-                        ? const Color.fromARGB(255, 229, 155, 45)
-                        : buildChessTileColour(x, y);
+  getSquareColor(y, x) {
+    if ((y, x) == selected) {
+      return const Color.fromARGB(218, 209, 91, 12);
+    }
+    if (legalMoves.contains((y, x))) {
+      return const Color.fromARGB(180, 229, 155, 10);
+    }
+    return buildChessTileColour(x, y);
   }
 
   getSquareBorder(y, x) {
-    return legalMoves.contains((y, x))
-                        ? Border.all(color: Colors.black54)
-                        : (previousMoveEnd == (y, x)
-                            ? Border.all(color: Colors.blue, width: 3)
-                            : Border.all(color: Colors.black12));
+    if ((y, x) == previousMoveEnd || (y, x) == previousMoveStart) {
+      return Border.all(color: Colors.blue, width: 3);
+    }
+    if (legalMoves.contains((y, x))) {
+      return Border.all(color: Colors.black54);
+    }
+    return Border.all(color: Colors.black12);
   }
 }
