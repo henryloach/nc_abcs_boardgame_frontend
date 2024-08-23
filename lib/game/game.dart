@@ -264,7 +264,8 @@ class Game {
     return legalMoves;
   }
 
-  Set<(int, int)> testBoardForChecks() {
+  // get Checking Pieces
+  Set<(int, int)> getChecks(option) {
     // save the inital gamestate to remeber who's turn it was
     GameState initial = gameState;
 
@@ -276,26 +277,30 @@ class Game {
       for (var column = 0; column < board[0].length; column++) {
         // get the piece(or null) at each square
         final piece = board[row][column];
+        if (piece == null) continue;
 
         // set the gamestate to that pieces color to allow the getLegalMoves function to work
-        gameState = piece != null && piece.colour == PieceColour.white
+        gameState = piece.colour == PieceColour.white
             ? GameState.whiteToMove
             : GameState.blackToMove;
 
         // get the legal moves of the piece
         final moves = getLegalMoves((row, column), testCheck: false);
 
-        // if any of the legal moves attack an oppsing king then add that move to the set
-        if (moves.any(
-          (move) {
-            final (y, x) = move;
-            final target = board[y][x];
-            return target != null &&
-                target.type == PieceType.king &&
-                target.colour != piece!.colour;
-          },
-        )) {
-          checks.add((row, column));
+        // if any of the legal moves attack an oppsing king then add that piece to the set
+        // or the king if that option is chosen
+        for (final move in moves) {
+          final (y, x) = move;
+          final target = board[y][x];
+          if (target == null) continue;
+          if (target.type == PieceType.king && target.colour != piece.colour) {
+            if (option == "kings") {
+              checks.add((y, x));
+            }
+            if (option == "attackers") {
+              checks.add((row, column));
+            }
+          }
         }
       }
     }
@@ -325,7 +330,7 @@ class Game {
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
-    final checks = testBoardForChecks();
+    final checks = getChecks('attackers');
 
     // remove this move
     checks.remove(moveToSquare);
@@ -366,7 +371,7 @@ class Game {
 
   bool isActivePlayerInCheck() {
     // get all the checks and return true if the attacked king is of the active palyer
-    for (final square in testBoardForChecks()) {
+    for (final square in getChecks('attackers')) {
       final (row, column) = square;
       if (board[row][column]!.colour == PieceColour.white &&
           gameState == GameState.blackToMove) {
