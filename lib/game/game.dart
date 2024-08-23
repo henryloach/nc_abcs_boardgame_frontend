@@ -2,6 +2,18 @@ import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
 
+// the type of each piece
+// the previous move for each piece (store this against the piece)
+
+// validMoves
+// - for a pawn:
+// - check if the piece to the left or right is a pawn and has a previous move of y +/- 2
+
+// movePiece
+// x for a pawn
+// x check if the move is diagonal and there is no piece in the square
+// x check for a piece at y +/- 1 and capture that instead
+
 class Game {
   // Use list for maybe adding more players in future
   // TODO maybe make a player class
@@ -37,13 +49,35 @@ class Game {
     final ChessPiece? piece = board[startRow][startColumn];
     final ChessPiece? target = board[endRow][endColumn];
 
+    final (int, int) move = (
+      moveToSquare.$1 - moveFromSquare.$1,
+      moveToSquare.$2 - moveFromSquare.$2
+    );
+
     // capture opponent's (or maybe your own) piece at the end square if one's there;
     if (target != null) {
       capturedPieces.add(target);
     }
 
+    // en-passent
+    if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
+      final ChessPiece? left = board[moveFromSquare.$2][moveFromSquare.$1 - 1];
+      final ChessPiece? right = board[moveFromSquare.$2][moveFromSquare.$1 + 1];
+
+      if (left != null) {
+        capturedPieces.add(left);
+        board[moveFromSquare.$2][moveFromSquare.$1 - 1] = null;
+      }
+
+      if (right != null) {
+        capturedPieces.add(right);
+        board[moveFromSquare.$2][moveFromSquare.$1 + 1] = null;
+      }
+    }
+
     // move selected piece to the end square;
-    piece!.hasMoved = true;
+    piece.hasMoved = true;
+    piece.previousMove = move;
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
@@ -164,6 +198,28 @@ class Game {
               piece.hasMoved == false &&
               board[y + dy][x + dx] == null) {
             resultSet.add((y + dy, x + dx));
+          }
+
+          if (piece.type == PieceType.pawn) {
+            print("en passent");
+            print("x = $row, y = $column");
+
+            final ChessPiece? left = row > 0 ? board[column][row - 1] : null;
+            final ChessPiece? right = row < 7 ? board[column][row + 1] : null;
+
+            print(left);
+            print(right);
+
+            if (left?.type == PieceType.pawn &&
+                (left?.previousMove?.$1 == 2 || left?.previousMove?.$1 == -2)) {
+              resultSet.add((column + 1, row + 1));
+            }
+
+            if (right?.type == PieceType.pawn &&
+                (right?.previousMove?.$1 == 2 ||
+                    right?.previousMove?.$1 == -2)) {
+              resultSet.add((column + 1, row - 1));
+            }
           }
         }
       } while (canRepeat);

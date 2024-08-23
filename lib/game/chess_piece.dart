@@ -2,6 +2,7 @@ class ChessPiece {
   final PieceType type;
   final PieceColour colour;
   bool hasMoved = false;
+  (int, int)? previousMove;
 
   ChessPiece(this.type, this.colour);
 
