@@ -23,22 +23,30 @@ class Promo {
 
 class _GameScreenState extends State<GameScreen> {
   var game = Game();
-  Set highlighted = {};
+  Set legalMoves = {};
   (int, int)? selected;
-  (int, int)? previousMove;
+  (int, int)? previousMoveStart;
+  (int, int)? previousMoveEnd;
 
   Promo promo = Promo();
 
   handleClick(y, x) {
     setState(() {
+      // no piece selected already
+      if (selected == null && game.board[y][x] == null) return;
+      if (selected == null && !game.doesPieceAtSquareBelongToActivePlayer(y, x))
+        return;
+
       if (selected == null) {
         selected = (y, x);
-        highlighted = game.getLegalMoves((y, x));
+        legalMoves = game.getLegalMoves((y, x));
+        // with piece selected
       } else {
-        if (highlighted.contains((y, x))) {
-          previousMove = selected;
+        if (legalMoves.contains((y, x))) {
+          ChessPiece? target = game.board[y][x];
 
-          ChessPiece? capturedPiece = game.board[y][x];
+          previousMoveStart = selected;
+          previousMoveEnd = (y, x);
           game.movePiece(selected!, (y, x));
 
           if (game.canPromote((y, x))) {
@@ -47,49 +55,54 @@ class _GameScreenState extends State<GameScreen> {
             promo = Promo(row: null, column: null, isMenuOpen: false);
           }
 
-          if (capturedPiece != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${capturedPiece.colour.name} ${capturedPiece.type.name} captured!',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+          if (target != null) {
+            showPopup(
+                message: '${target.colour.name} ${target.type.name} captured!',
+                backgroundColor: Colors.green);
           }
 
-          highlighted = {};
+          legalMoves = {};
           selected = null;
         } else {
-          if (selected != null && selected != (y, x)) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  'Invalid move!',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-            selected = previousMove;
-          } else {
+          // deselect piece if clicked again
+          if (selected == (y, x)) {
+            legalMoves = {};
+            selected = null;
+          }
+          // select between pieces without illegal move message
+          if (selected != (y, x) &&
+              game.doesPieceAtSquareBelongToActivePlayer(y, x)) {
             selected = (y, x);
-            highlighted = game.getLegalMoves((y, x));
+            legalMoves = game.getLegalMoves((y, x));
+          } else {
+            showPopup(message: 'Invalid move!', backgroundColor: Colors.red);
+            selected = previousMoveStart;
+            selected = null;
+            legalMoves = {};
           }
         }
       }
     });
+  }
+
+  showPopup({
+    required String message,
+    required Color? backgroundColor,
+  }) {
+    return ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
@@ -204,12 +217,12 @@ class _GameScreenState extends State<GameScreen> {
                   onPressed: () => handleClick(y, x),
                   icon: Container(
                     decoration: BoxDecoration(
-                      border: highlighted.contains((y, x))
+                      border: legalMoves.contains((y, x))
                           ? Border.all(color: Colors.black54)
-                          : (previousMove == (y, x)
+                          : (previousMoveStart == (y, x)
                               ? Border.all(color: Colors.blue, width: 3)
                               : Border.all(color: Colors.black12)),
-                      color: highlighted.contains((y, x))
+                      color: legalMoves.contains((y, x))
                           ? const Color.fromARGB(255, 229, 155, 45)
                           : buildChessTileColour(x, y),
                     ),
@@ -220,10 +233,10 @@ class _GameScreenState extends State<GameScreen> {
                             decoration: BoxDecoration(
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3), 
-                                  spreadRadius: 1, 
-                                  blurRadius: 4, 
-                                  offset: Offset(0, 2), 
+                                  color: Colors.black.withOpacity(0.3),
+                                  spreadRadius: 1,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -243,7 +256,6 @@ class _GameScreenState extends State<GameScreen> {
       ],
     );
   }
-
 
   Color buildChessTileColour(int x, int y) {
     int val = x;
