@@ -28,10 +28,9 @@ class _BoardState extends State<Board> {
   (int, int)? previousMoveEnd;
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
 
-  Map<(int, int), bool> disappearingPieces = {};
-
   handleClick(y, x) {
     setState(() {
+      // no piece selected already
       if (selected == null && widget.game.board[y][x] == null) return;
       if (selected == null &&
           !widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) return;
@@ -39,13 +38,13 @@ class _BoardState extends State<Board> {
       if (selected == null) {
         selected = (y, x);
         legalMoves = widget.game.getLegalMoves((y, x));
+        // with piece selected
       } else {
         if (legalMoves.contains((y, x))) {
           ChessPiece? target = widget.game.board[y][x];
 
           previousMoveStart = selected;
           previousMoveEnd = (y, x);
-          
           widget.game.movePiece(selected!, (y, x));
           checkers = widget.game.getChecks('attackers');
           checkees = widget.game.getChecks('kings');
@@ -56,34 +55,53 @@ class _BoardState extends State<Board> {
             widget.setPromo(Promo(row: null, column: null, isMenuOpen: false));
           }
 
-
           if (target != null) {
-            setState(() {
-              disappearingPieces[(y, x)] = true;
-            });
-            Future.delayed(const Duration(milliseconds: 300), () {
-              setState(() {
-                widget.game.movePiece(selected!, (y, x));
-                disappearingPieces.remove((y, x));
-              });
-            });
-          } else {
-            widget.game.movePiece(selected!, (y, x));
+            showPopup(
+                message: '${target.colour.name} ${target.type.name} captured!',
+                backgroundColor: Colors.green);
           }
 
           legalMoves = {};
           selected = null;
         } else {
+          // deselect piece if clicked again
           if (selected == (y, x)) {
             legalMoves = {};
             selected = null;
-          } else if (widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) {
+          }
+          // select between pieces without illegal move message
+          if (selected != (y, x) &&
+              widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) {
             selected = (y, x);
             legalMoves = widget.game.getLegalMoves((y, x));
+          } else {
+            showPopup(message: 'Invalid move!', backgroundColor: Colors.red);
+            legalMoves = {};
+            selected = null;
           }
         }
       }
     });
+  }
+
+  showPopup({
+    required String message,
+    required Color? backgroundColor,
+  }) {
+    return ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -95,36 +113,37 @@ class _BoardState extends State<Board> {
           children: [
             ...List.generate(
               widget.game.board[0].length,
-              (x) {
-                return IconButton(
-                  padding: const EdgeInsets.all(0),
-                  onPressed: () => handleClick(y, x),
-                  icon: Container(
-                    decoration: BoxDecoration(
-                      border: getSquareBorder(y, x),
-                      color: getSquareColor(y, x),
-                    ),
-                    width: tileWidth,
-                    height: tileWidth,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return ScaleTransition(scale: animation, child: child);
-                      },
-                      child: disappearingPieces.containsKey((y, x))
-                          ? Container() 
-                          : widget.game.getAssetPathAtSquare((y, x)) != ""
-                              ? SvgPicture.asset(
-                                  widget.game.getAssetPathAtSquare((y, x)),
-                                  height: tileWidth,
-                                  width: tileWidth,
-                                  key: ValueKey(widget.game.getAssetPathAtSquare((y, x))),
-                                )
-                              : null,
-                    ),
+              (x) => IconButton(
+                padding: const EdgeInsets.all(0),
+                onPressed: () => handleClick(y, x),
+                icon: Container(
+                  decoration: BoxDecoration(
+                    border: getSquareBorder(y, x),
+                    color: getSquareColor(y, x),
                   ),
-                );
-              },
+                  width: tileWidth,
+                  height: tileWidth,
+                  child: widget.game.getAssetPathAtSquare((y, x)) != ""
+                      ? Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: SvgPicture.asset(
+                            widget.game.getAssetPathAtSquare((y, x)),
+                            height: tileWidth,
+                            width: tileWidth,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
             ),
           ],
         ),
