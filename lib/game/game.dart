@@ -2,18 +2,6 @@ import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
 
-// the type of each piece
-// the previous move for each piece (store this against the piece)
-
-// validMoves
-// - for a pawn:
-// - check if the piece to the left or right is a pawn and has a previous move of y +/- 2
-
-// movePiece
-// x for a pawn
-// x check if the move is diagonal and there is no piece in the square
-// x check for a piece at y +/- 1 and capture that instead
-
 class Game {
   // Use list for maybe adding more players in future
   // TODO maybe make a player class
@@ -21,6 +9,8 @@ class Game {
 
   List<List<ChessPiece?>> board;
   List<ChessPiece> capturedPieces = [];
+  // added this state for en-passant
+  (int, int)? previousTo;
 
   GameState gameState = GameState.whiteToMove;
 
@@ -59,25 +49,26 @@ class Game {
       capturedPieces.add(target);
     }
 
-    // en-passent
+    // en-passant's capture
     if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
-      final ChessPiece? left = board[moveFromSquare.$2][moveFromSquare.$1 - 1];
-      final ChessPiece? right = board[moveFromSquare.$2][moveFromSquare.$1 + 1];
+      final ChessPiece? left = board[moveFromSquare.$1][moveFromSquare.$2 - 1];
+      final ChessPiece? right = board[moveFromSquare.$1][moveFromSquare.$2 + 1];
 
       if (left != null) {
         capturedPieces.add(left);
-        board[moveFromSquare.$2][moveFromSquare.$1 - 1] = null;
+        board[moveFromSquare.$1][moveFromSquare.$2 - 1] = null;
       }
 
       if (right != null) {
         capturedPieces.add(right);
-        board[moveFromSquare.$2][moveFromSquare.$1 + 1] = null;
+        board[moveFromSquare.$1][moveFromSquare.$2 + 1] = null;
       }
     }
 
     // move selected piece to the end square;
     piece.hasMoved = true;
     piece.previousMove = move;
+    previousTo = moveToSquare;
     board[endRow][endColumn] = piece;
     board[startRow][startColumn] = null;
 
@@ -166,7 +157,7 @@ class Game {
       if (piece!.colour == PieceColour.white) dy = -dy;
 
       do {
-        // get the coordianted of the considered move
+        // get the coordinates of the considered move
         y = y + dy;
         x = x + dx;
 
@@ -200,25 +191,39 @@ class Game {
             resultSet.add((y + dy, x + dx));
           }
 
+          // "en passant"
+          // notes:
+          // the type of each piece
+          // the previous move for each piece (store this against the piece)
+          // validMoves: (for a pawn)
+          // check if the piece to the left or right is a pawn, and has a previous move of y +/- 2
+          // movePiece:
+          // [x] for a pawn
+          // [x] check if the move is diagonal and there is no piece in the square
+          // [x] check for a piece at y +/- 1 and capture that instead
+
           if (piece.type == PieceType.pawn) {
-            print("en passent");
-            print("x = $row, y = $column");
+            // vm = vertical move
+            final vm = piece.colour == PieceColour.white ? -1 : 1;
+            final ChessPiece? left = column > 0 ? board[row][column - 1] : null;
+            final ChessPiece? right =
+                column < 7 ? board[row][column + 1] : null;
 
-            final ChessPiece? left = row > 0 ? board[column][row - 1] : null;
-            final ChessPiece? right = row < 7 ? board[column][row + 1] : null;
-
-            print(left);
-            print(right);
-
-            if (left?.type == PieceType.pawn &&
+            if (left?.type == PieceType.pawn && // is it a pawn?
+                left?.colour != piece.colour && // is it not your pawn?
+                previousTo ==
+                    (row, column - 1) && // was it the last piece to move?
                 (left?.previousMove?.$1 == 2 || left?.previousMove?.$1 == -2)) {
-              resultSet.add((column + 1, row + 1));
+              // did it move by 2?
+              resultSet.add((row + vm, column - 1));
             }
 
             if (right?.type == PieceType.pawn &&
+                right?.colour != piece.colour &&
+                previousTo == (row, column + 1) &&
                 (right?.previousMove?.$1 == 2 ||
                     right?.previousMove?.$1 == -2)) {
-              resultSet.add((column + 1, row - 1));
+              resultSet.add((row + vm, column + 1));
             }
           }
         }
@@ -249,6 +254,7 @@ class Game {
 
     // remove moves that would result in placing your own king in check
     if (testCheck) {
+      // <-- enable this again
       legalMoves.removeWhere((targetSquare) {
         return testMoveForOpposingChecks(square, targetSquare);
       });
@@ -387,10 +393,12 @@ class Game {
     }
   }
 
-  bool doesPieceAtSquareBelongToActivePlayer(y,x) {
+  bool doesPieceAtSquareBelongToActivePlayer(y, x) {
     if (board[y][x] == null) return false;
-    if (board[y][x]!.colour == PieceColour.white && gameState == GameState.whiteToMove) return true;
-    if (board[y][x]!.colour == PieceColour.black && gameState == GameState.blackToMove) return true;
+    if (board[y][x]!.colour == PieceColour.white &&
+        gameState == GameState.whiteToMove) return true;
+    if (board[y][x]!.colour == PieceColour.black &&
+        gameState == GameState.blackToMove) return true;
     return false;
   }
 }
