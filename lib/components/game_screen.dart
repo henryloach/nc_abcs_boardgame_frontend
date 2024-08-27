@@ -19,7 +19,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  var game = Game(gameVariant: GameVariant.edgeWrap);
+  var game = Game(gameVariant: GameVariant.normal);
   var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
@@ -143,7 +143,7 @@ class _GameScreenState extends State<GameScreen> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  game = Game(gameVariant: GameVariant.edgeWrap);
+                  game = Game(gameVariant: GameVariant.normal);
                   boardHighlights = BoardHighlights();
                 });
               },
