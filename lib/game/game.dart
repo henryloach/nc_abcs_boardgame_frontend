@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
+import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 // castling
 // 1 - moves:
@@ -20,19 +21,26 @@ class Game {
   // TODO maybe make a player class
   // List<String> players = ["player1", "player2"];
 
-  List<List<ChessPiece?>> board;
+  late List<List<ChessPiece?>> board;
+  final GameVariant gameVariant;
   List<ChessPiece> capturedPieces = [];
   (int, int)? previousTo;
   GameState gameState = GameState.whiteToMove;
 
   // Constructor with an optional named parameter for the FEN string
-  Game(
-      {String fenString =
-          "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"})
-      : board = decodeFEN(fenString),
-        gameState = fenString.split(" ")[1] == "w"
-            ? GameState.whiteToMove
-            : GameState.blackToMove; // this is an "initializer list"
+  Game({this.gameVariant = GameVariant.normal, String? fenString}) {
+    if (fenString != null) {
+      board = decodeFEN(fenString);
+      gameState = fenString.split(" ")[1] == "w"
+          ? GameState.whiteToMove
+          : GameState.blackToMove; // this is an "initializer list"
+    } else {
+      board = decodeFEN(gameVariantFenMap[gameVariant]);
+      gameState = gameVariantFenMap[gameVariant].split(" ")[1] == "w"
+          ? GameState.whiteToMove
+          : GameState.blackToMove; // this is an "initializer list"
+    }
+  }
 
   // get the path to the svg file
   String getAssetPathAtSquare((int, int) square) {
@@ -50,6 +58,10 @@ class Game {
     final ChessPiece? piece = board[startRow][startColumn];
     final ChessPiece? target = board[endRow][endColumn];
 
+    print("GAME.DART");
+    print(piece?.colour.name);
+    print(server.myPieces);
+
     final (int, int) move = (
       moveToSquare.$1 - moveFromSquare.$1,
       moveToSquare.$2 - moveFromSquare.$2
@@ -61,6 +73,7 @@ class Game {
     }
 
     // en-passant's capture - repaired for the 'edge' cases - elementAtOrNull instead of using sq brackets
+
     if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
       final ChessPiece? left =
           board[moveFromSquare.$1].elementAtOrNull(moveFromSquare.$2 - 1);
@@ -145,6 +158,7 @@ class Game {
     }
 
     board[y][x] = ChessPiece(type, colour);
+    testForWinCondition();
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
@@ -182,9 +196,14 @@ class Game {
         y = y + dy;
         x = x + dx;
 
+        // extra logic for edgeWrap Variant
+        if (gameVariant == GameVariant.edgeWrap) x = x % boardWidth;
+        if (resultSet.contains((y, x))) break;
+
         // board bounds check
         if (y >= boardHeight || y < 0) break;
         if (x >= boardWidth || x < 0) break;
+
 
         // get the piece(or null) at the target coordinates
         final ChessPiece? targetPiece = board[y][x];
@@ -456,4 +475,11 @@ class Game {
   }
 }
 
-enum GameState { whiteToMove, blackToMove, whiteWin, blackWin, draw }
+enum GameState {
+  whiteToMove,
+  blackToMove,
+  whiteWin,
+  blackWin,
+  draw,
+  hasGameStarted
+}
