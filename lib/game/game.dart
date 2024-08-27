@@ -124,6 +124,7 @@ class Game {
     }
 
     board[y][x] = ChessPiece(type, colour);
+    testForWinCondition();
   }
 
   Set<(int, int)> getLegalMoves((int, int) square, {bool testCheck = true}) {
