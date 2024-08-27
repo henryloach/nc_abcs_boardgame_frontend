@@ -1,6 +1,19 @@
+import 'dart:math';
+
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
+
+// castling
+// 1 - moves:
+// [] kingside (simultaneously) - king moves 2 positions to the right; rook moves to the left of it
+// [] queenside (simultaneously) - king moves 2 positions to the left; rook moves to the right of it
+// 2 - rules:
+// [] king has not moved from initial position
+// [] rook has not moved either
+// [] all squares between the king and rook must be empty
+// [] cannot castle out of check
+// [] king may not move through or into check
 
 class Game {
   // Use list for maybe adding more players in future
@@ -9,9 +22,7 @@ class Game {
 
   List<List<ChessPiece?>> board;
   List<ChessPiece> capturedPieces = [];
-  // added this state for en-passant
   (int, int)? previousTo;
-
   GameState gameState = GameState.whiteToMove;
 
   // Constructor with an optional named parameter for the FEN string
@@ -49,10 +60,12 @@ class Game {
       capturedPieces.add(target);
     }
 
-    // en-passant's capture
+    // en-passant's capture - repaired for the 'edge' cases - elementAtOrNull instead of using sq brackets
     if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
-      final ChessPiece? left = board[moveFromSquare.$1][moveFromSquare.$2 - 1];
-      final ChessPiece? right = board[moveFromSquare.$1][moveFromSquare.$2 + 1];
+      final ChessPiece? left =
+          board[moveFromSquare.$1].elementAtOrNull(moveFromSquare.$2 - 1);
+      final ChessPiece? right =
+          board[moveFromSquare.$1].elementAtOrNull(moveFromSquare.$2 + 1);
 
       if (left != null) {
         capturedPieces.add(left);
@@ -63,6 +76,14 @@ class Game {
         capturedPieces.add(right);
         board[moveFromSquare.$1][moveFromSquare.$2 + 1] = null;
       }
+    }
+
+    if (piece.type == PieceType.king && move.$2 == -2) {
+      movePiece((startRow, 0), (startRow, 3));
+    }
+
+    if (piece.type == PieceType.king && move.$2 == 2) {
+      movePiece((startRow, 7), (startRow, 5));
     }
 
     // move selected piece to the end square;
@@ -224,6 +245,33 @@ class Game {
                 (right?.previousMove?.$1 == 2 ||
                     right?.previousMove?.$1 == -2)) {
               resultSet.add((row + vm, column + 1));
+            }
+          }
+
+          // If the king hasn't moved
+          // If the rook on either side hasn't moved
+          // If the king is not in check
+          // All squares are empty between the king and the rook
+          // Add an extra move to the result set
+
+          if (piece.type == PieceType.king &&
+              piece.hasMoved == false &&
+              // testCheck == true to prevent an infinite loop - calling getLegalMoves...
+              testCheck == true &&
+              isActivePlayerInCheck() == false) {
+            final maybeLeftRook = board[row][0];
+            final maybeRightRook = board[row][7];
+
+            if (maybeLeftRook?.type == PieceType.rook) {
+              if ([1, 2, 3].every((c) => board[row][c] == null)) {
+                resultSet.add((row, column - 2));
+              }
+            }
+
+            if (maybeRightRook?.type == PieceType.rook) {
+              if ([5, 6].every((c) => board[row][c] == null)) {
+                resultSet.add((row, column + 2));
+              }
             }
           }
         }
