@@ -51,6 +51,17 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  void _handleMove(String message) {
+    var [startY, startX, endY, endX] = message
+        .substring(5)
+        .split(',')
+        .map((stringNum) => int.parse(stringNum))
+        .toList();
+    setState(() {
+      game.movePiece((startY, startX), (endY, endX));
+    });
+  }
+
   void _setPromo(Promo newPromo) {
     setState(() {
       promo = newPromo;
@@ -59,6 +70,22 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+  //notification build widget
+  
+      if (game.gameState == GameState.whiteWin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'White Wins!');
+      });
+    } else if (game.gameState == GameState.blackWin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'Black Wins!');
+      });
+    } else if (game.gameState == GameState.draw) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'Draw');
+      });
+    }
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -73,8 +100,18 @@ class _GameScreenState extends State<GameScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
           const Spacer(),
-          CapturedPieceDisplay(
-              capturedPieces: game.capturedPieces, colour: PieceColour.white),
+
+          Text(
+            "${server.opponentUsername}",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          server.opponentPieces == "null"
+              ? const Center(child: CircularProgressIndicator())
+              : server.opponentPieces == "white"
+                  ? BlackCapturedPieces(game: game)
+                  : WhiteCapturedPieces(game: game),
+
           const Spacer(),
           Container(
               decoration: BoxDecoration(
@@ -94,8 +131,18 @@ class _GameScreenState extends State<GameScreen> {
                 boardHighlights: boardHighlights,
               )),
           const Spacer(),
-          CapturedPieceDisplay(
-              capturedPieces: game.capturedPieces, colour: PieceColour.black),
+
+          server.myPieces == "null"
+              ? const Center(child: CircularProgressIndicator())
+              : server.myPieces == "white"
+                  ? BlackCapturedPieces(game: game)
+                  : WhiteCapturedPieces(game: game),
+          const Spacer(),
+          Text(
+            "${server.myUsername}",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+
           const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
@@ -147,6 +194,42 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
+  }
+
+  // notification overlay
+
+  void _showResultMessage(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: 0,
+        right: 0,
+        top: MediaQuery.of(context).size.height / 3,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.black.withOpacity(0.7),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 }
 
