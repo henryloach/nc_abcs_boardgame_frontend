@@ -8,7 +8,8 @@ class Game {
   // TODO maybe make a player class
   // List<String> players = ["player1", "player2"];
 
-  List<List<ChessPiece?>> board;
+  late List<List<ChessPiece?>> board;
+  final GameVariant gameVariant;
   List<ChessPiece> capturedPieces = [];
   // added this state for en-passant
   (int, int)? previousTo;
@@ -16,13 +17,19 @@ class Game {
   GameState gameState = GameState.whiteToMove;
 
   // Constructor with an optional named parameter for the FEN string
-  Game(
-      {String fenString =
-          "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"})
-      : board = decodeFEN(fenString),
-        gameState = fenString.split(" ")[1] == "w"
-            ? GameState.whiteToMove
-            : GameState.blackToMove; // this is an "initializer list"
+  Game({this.gameVariant = GameVariant.normal, String? fenString}) {
+    if (fenString != null) {
+      board = decodeFEN(fenString);
+      gameState = fenString.split(" ")[1] == "w"
+          ? GameState.whiteToMove
+          : GameState.blackToMove; // this is an "initializer list"
+    } else {
+      board = decodeFEN(gameVariantFenMap[gameVariant]);
+      gameState = gameVariantFenMap[gameVariant].split(" ")[1] == "w"
+          ? GameState.whiteToMove
+          : GameState.blackToMove; // this is an "initializer list"
+    }
+  }
 
   // get the path to the svg file
   String getAssetPathAtSquare((int, int) square) {
@@ -171,9 +178,14 @@ class Game {
         y = y + dy;
         x = x + dx;
 
+        // extra logic for edgeWrap Variant
+        if (gameVariant == GameVariant.edgeWrap) x = x % boardWidth;
+        if (resultSet.contains((y, x))) break;
+
         // board bounds check
         if (y >= boardHeight || y < 0) break;
         if (x >= boardWidth || x < 0) break;
+
 
         // get the piece(or null) at the target coordinates
         final ChessPiece? targetPiece = board[y][x];

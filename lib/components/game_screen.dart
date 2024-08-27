@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board.dart';
+import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
 import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
+import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
@@ -17,7 +19,8 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  var game = Game();
+  var game = Game(gameVariant: GameVariant.edgeWrap);
+  var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
   final WebSocketService _webSocketService = WebSocketService();
@@ -44,6 +47,18 @@ class _GameScreenState extends State<GameScreen> {
         .toList();
     setState(() {
       game.movePiece((startY, startX), (endY, endX));
+
+      boardHighlights.previousMoveStart = (startY, startX);
+      boardHighlights.previousMoveEnd = (endY, endX);
+
+      boardHighlights.checkers = game.getChecks('attackers');
+      boardHighlights.checkees = game.getChecks('kings');
+
+      if (game.canPromote((endY, endX))) {
+        _setPromo(Promo(row: endY, column: endX, isMenuOpen: true));
+      } else {
+        _setPromo(Promo(row: null, column: null, isMenuOpen: false));
+      }
     });
   }
 
@@ -53,13 +68,11 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
+    //notification build widget
 
-  //notification build widget
-  
-      if (game.gameState == GameState.whiteWin) {
+    if (game.gameState == GameState.whiteWin) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showResultMessage(context, 'White Wins!');
       });
@@ -110,6 +123,7 @@ class _GameScreenState extends State<GameScreen> {
                 game: game,
                 promo: promo,
                 setPromo: _setPromo,
+                boardHighlights: boardHighlights,
               )),
           const Spacer(),
           server.myPieces == "null"
@@ -129,7 +143,8 @@ class _GameScreenState extends State<GameScreen> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  game = Game();
+                  game = Game(gameVariant: GameVariant.edgeWrap);
+                  boardHighlights = BoardHighlights();
                 });
               },
               child: const Text('Reset')),
