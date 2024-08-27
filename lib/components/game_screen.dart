@@ -67,6 +67,11 @@ class _GameScreenState extends State<GameScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
           const Spacer(),
+          Text(
+            "${server.opponentUsername}",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
           server.opponentPieces == "null"
               ? const Center(child: CircularProgressIndicator())
               : server.opponentPieces == "white"
@@ -97,7 +102,7 @@ class _GameScreenState extends State<GameScreen> {
                   : WhiteCapturedPieces(game: game),
           const Spacer(),
           Text(
-            widget.username,
+            "${server.myUsername}",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
