@@ -52,6 +52,7 @@ class _GameScreenState extends State<GameScreen> {
 
       boardHighlights.checkers = game.getChecks('attackers');
       boardHighlights.checkees = game.getChecks('kings');
+      
     });
   }
 

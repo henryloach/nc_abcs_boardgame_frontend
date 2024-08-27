@@ -29,39 +29,34 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   final WebSocketService _webSocketService = WebSocketService();
 
-  Set legalMoves = {};
-  (int, int)? selected;
-
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
 
   handleClick(y, x) {
     setState(() {
       // no piece selected already
-      if (selected == null && widget.game.board[y][x] == null) return;
-      if (selected == null &&
+      if (widget.boardHighlights.selected == null && widget.game.board[y][x] == null) return;
+      if (widget.boardHighlights.selected == null &&
           !widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) return;
 
-      if (selected == null) {
-        selected = (y, x);
-        widget.boardHighlights.selected = selected;
+      if (widget.boardHighlights.selected == null) {
+        widget.boardHighlights.selected = (y, x);
 
-        legalMoves = widget.game.getLegalMoves((y, x));
-        widget.boardHighlights.legalMoves = legalMoves;
+        widget.boardHighlights.legalMoves = widget.game.getLegalMoves((y, x));
 
         // with piece selected
       } else {
-        if (legalMoves.contains((y, x))) {
+        if (widget.boardHighlights.legalMoves.contains((y, x))) {
           ChessPiece? target = widget.game.board[y][x];
 
           // widget.game.movePiece(selected!, (y, x));
 
-          final selectedPiece = widget.game.board[selected!.$1][selected!.$2];
+          final selectedPiece = widget.game.board[widget.boardHighlights.selected!.$1][widget.boardHighlights.selected!.$2];
 
           if (selectedPiece!.colour.name == server.myPieces) {
-            widget.boardHighlights.previousMoveStart = selected;
+            widget.boardHighlights.previousMoveStart = widget.boardHighlights.selected;
             widget.boardHighlights.previousMoveEnd = (y, x);
             _webSocketService
-                .sendMessage('move:${selected!.$1},${selected!.$2},$y,$x');
+                .sendMessage('move:${widget.boardHighlights.selected!.$1},${widget.boardHighlights.selected!.$2},$y,$x');
           } else {
             print("Not your piece");
           }
@@ -81,23 +76,23 @@ class _BoardState extends State<Board> {
                 backgroundColor: Colors.green);
           }
 
-          legalMoves = {};
-          selected = null;
+          widget.boardHighlights.legalMoves = {};
+          widget.boardHighlights.selected = null;
         } else {
           // deselect piece if clicked again
-          if (selected == (y, x)) {
-            legalMoves = {};
-            selected = null;
+          if (widget.boardHighlights.selected == (y, x)) {
+            widget.boardHighlights.legalMoves = {};
+            widget.boardHighlights.selected = null;
           }
           // select between pieces without illegal move message
-          if (selected != (y, x) &&
+          if (widget.boardHighlights.selected != (y, x) &&
               widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) {
-            selected = (y, x);
-            legalMoves = widget.game.getLegalMoves((y, x));
+            widget.boardHighlights.selected = (y, x);
+            widget.boardHighlights.legalMoves = widget.game.getLegalMoves((y, x));
           } else {
             showPopup(message: 'Invalid move!', backgroundColor: Colors.red);
-            legalMoves = {};
-            selected = null;
+            widget.boardHighlights.legalMoves = {};
+            widget.boardHighlights.selected = null;
           }
         }
       }
@@ -241,10 +236,10 @@ class _BoardState extends State<Board> {
   }
 
   getSquareColor(y, x) {
-    if ((y, x) == selected) {
+    if ((y, x) == widget.boardHighlights.selected) {
       return const Color.fromARGB(218, 209, 91, 12);
     }
-    if (legalMoves.contains((y, x))) {
+    if (widget.boardHighlights.legalMoves.contains((y, x))) {
       return const Color.fromARGB(180, 229, 155, 10);
     }
     return buildChessTileColour(x, y);
