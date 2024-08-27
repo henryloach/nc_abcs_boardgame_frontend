@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
+import 'package:nc_abcs_boardgame_frontend/game/user.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -58,7 +59,8 @@ _input(context, webSocketService) {
       ),
       ElevatedButton(
         onPressed: () {
-          webSocketService.sendMessage('user:${controller.text}');
+          user.username = controller.text;
+          webSocketService.sendMessage('user:${user.username}');
           Navigator.push(
               context,
               MaterialPageRoute(

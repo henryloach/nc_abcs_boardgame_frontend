@@ -1,4 +1,6 @@
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:nc_abcs_boardgame_frontend/game/user.dart';
+import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class WebSocketService {
   static final WebSocketService _instance = WebSocketService._internal();
@@ -12,7 +14,7 @@ class WebSocketService {
   }
 
   WebSocketService._internal() {
-    _startWebSocket('ws://christianloach.com:8080'); //server url goeshere
+    _startWebSocket('ws://192.168.1.108:8080'); //server url goeshere
   }
 
   // TODO remove all these print statements maybe at some point
@@ -32,6 +34,21 @@ class WebSocketService {
           print('Received: $message');
           if (onMessageReceived != null) {
             onMessageReceived!(message);
+            if (message.contains("user")) {
+              final username = message.split(":")[1];
+              final pieces = message.split(":")[2];
+              print(message);
+              if (user.username == username) {
+                server.myUsername = username;
+                server.myPieces = pieces;
+                print("me: ${server.myUsername}, ${server.myPieces}");
+              } else {
+                server.opponentUsername = username;
+                server.opponentPieces = pieces;
+                print(
+                    "ot: ${server.opponentUsername}, ${server.opponentPieces}");
+              }
+            }
           }
         },
         onDone: () {

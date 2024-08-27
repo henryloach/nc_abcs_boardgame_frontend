@@ -5,16 +5,19 @@ import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/custom_colors.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
+import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class Board extends StatefulWidget {
   final Game game;
   final Promo promo;
   final Function setPromo;
-  const Board(
-      {super.key,
-      required this.game,
-      required this.promo,
-      required this.setPromo});
+
+  const Board({
+    super.key,
+    required this.game,
+    required this.promo,
+    required this.setPromo,
+  });
 
   @override
   State<Board> createState() => _BoardState();
@@ -113,9 +116,38 @@ class _BoardState extends State<Board> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _checkForPieceAssignment();
+  }
+
+  void _checkForPieceAssignment() {
+    if (server.myPieces == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {}); // rebuild or check again
+          _checkForPieceAssignment();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
+    // print(server.myPieces);
+    switch (server.myPieces) {
+      case "white":
+        return Column(children: generateWhiteBoard);
+      case "black":
+        return Column(children: generateBlackBoard);
+      default:
+        return const Center(child: CircularProgressIndicator());
+    }
+  }
+
+  List<Widget> get generateWhiteBoard {
+    return [
+      ...List.generate(
         widget.game.board.length,
         (y) => Row(
           children: [
@@ -125,34 +157,78 @@ class _BoardState extends State<Board> {
                 padding: const EdgeInsets.all(0),
                 onPressed: () => handleClick(y, x),
                 icon: Container(
-                    decoration: BoxDecoration(
-                      border: getSquareBorder(y, x),
-                      color: getSquareColor(y, x),
-                    ),
-                    width: tileWidth,
-                    height: tileWidth,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return ScaleTransition(scale: animation, child: child);
-                      },
-                      child: widget.game.getAssetPathAtSquare((y, x)) != ""
-                          ? SvgPicture.asset(
-                              widget.game.getAssetPathAtSquare((y, x)),
-                              height: tileWidth,
-                              width: tileWidth,
-                              key: ValueKey(
-                                  widget.game.getAssetPathAtSquare((y, x))),
-                            )
-                          : null,
-                    )),
+                  decoration: BoxDecoration(
+                    border: getSquareBorder(y, x),
+                    color: getSquareColor(y, x),
+                  ),
+                  width: tileWidth,
+                  height: tileWidth,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: widget.game.getAssetPathAtSquare((y, x)) != ""
+                        ? SvgPicture.asset(
+                            widget.game.getAssetPathAtSquare((y, x)),
+                            height: tileWidth,
+                            width: tileWidth,
+                            key: ValueKey(
+                                widget.game.getAssetPathAtSquare((y, x))),
+                          )
+                        : null,
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
-    );
+    ];
+  }
+
+  List<Widget> get generateBlackBoard {
+    return [
+      ...List.generate(
+        widget.game.board.length,
+        (y) => Row(
+          children: [
+            ...List.generate(
+              widget.game.board[0].length,
+              (x) => IconButton(
+                padding: const EdgeInsets.all(0),
+                onPressed: () => handleClick(y, x),
+                icon: Container(
+                  decoration: BoxDecoration(
+                    border: getSquareBorder(y, x),
+                    color: getSquareColor(y, x),
+                  ),
+                  width: tileWidth,
+                  height: tileWidth,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: widget.game.getAssetPathAtSquare((y, x)) != ""
+                        ? SvgPicture.asset(
+                            widget.game.getAssetPathAtSquare((y, x)),
+                            height: tileWidth,
+                            width: tileWidth,
+                            key: ValueKey(
+                                widget.game.getAssetPathAtSquare((y, x))),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ).reversed,
+          ],
+        ),
+      ).reversed,
+    ];
   }
 
   getSquareColor(y, x) {

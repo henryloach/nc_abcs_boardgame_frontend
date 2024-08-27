@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

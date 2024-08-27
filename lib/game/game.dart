@@ -408,4 +408,11 @@ class Game {
   }
 }
 
-enum GameState { whiteToMove, blackToMove, whiteWin, blackWin, draw }
+enum GameState {
+  whiteToMove,
+  blackToMove,
+  whiteWin,
+  blackWin,
+  draw,
+  hasGameStarted
+}
