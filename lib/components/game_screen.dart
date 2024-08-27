@@ -6,6 +6,7 @@ import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dar
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
+import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
@@ -18,7 +19,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  var game = Game();
+  var game = Game(gameVariant: GameVariant.edgeWrap);
   var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
@@ -52,7 +53,12 @@ class _GameScreenState extends State<GameScreen> {
 
       boardHighlights.checkers = game.getChecks('attackers');
       boardHighlights.checkees = game.getChecks('kings');
-      
+
+      if (game.canPromote((endY, endX))) {
+        _setPromo(Promo(row: endY, column: endX, isMenuOpen: true));
+      } else {
+        _setPromo(Promo(row: null, column: null, isMenuOpen: false));
+      }
     });
   }
 
@@ -137,7 +143,7 @@ class _GameScreenState extends State<GameScreen> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  game = Game();
+                  game = Game(gameVariant: GameVariant.edgeWrap);
                   boardHighlights = BoardHighlights();
                 });
               },

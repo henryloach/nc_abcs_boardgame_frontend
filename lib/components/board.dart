@@ -29,7 +29,7 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   final WebSocketService _webSocketService = WebSocketService();
 
-  late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
+  late final double tileWidth = MediaQuery.of(context).size.width / widget.game.board[0].length;
 
   handleClick(y, x) {
     setState(() {
