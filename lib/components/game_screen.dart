@@ -25,8 +25,25 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+
+  //notification build widget
+  
+      if (game.gameState == GameState.whiteWin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'White Wins!');
+      });
+    } else if (game.gameState == GameState.blackWin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'Black Wins!');
+      });
+    } else if (game.gameState == GameState.draw) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultMessage(context, 'Draw');
+      });
+    }
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -113,6 +130,42 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
+  }
+
+  // notification overlay
+
+  void _showResultMessage(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: 0,
+        right: 0,
+        top: MediaQuery.of(context).size.height / 3,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.black.withOpacity(0.7),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 }
 
