@@ -42,7 +42,6 @@ class _GameScreenState extends State<GameScreen> {
         .split(',')
         .map((stringNum) => int.parse(stringNum))
         .toList();
-    // Update the game state with the new move
     setState(() {
       game.movePiece((startY, startX), (endY, endX));
     });

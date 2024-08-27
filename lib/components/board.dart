@@ -54,8 +54,15 @@ class _BoardState extends State<Board> {
           previousMoveEnd = (y, x);
 
           // widget.game.movePiece(selected!, (y, x));
-          _webSocketService
-              .sendMessage('move:${selected!.$1},${selected!.$2},$y,$x');
+
+          final selectedPiece = widget.game.board[selected!.$1][selected!.$2];
+
+          if (selectedPiece!.colour.name == server.myPieces) {
+            _webSocketService
+                .sendMessage('move:${selected!.$1},${selected!.$2},$y,$x');
+          } else {
+            print("Not your piece");
+          }
 
           checkers = widget.game.getChecks('attackers');
           checkees = widget.game.getChecks('kings');

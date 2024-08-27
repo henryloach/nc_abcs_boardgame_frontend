@@ -1,6 +1,7 @@
 import 'package:nc_abcs_boardgame_frontend/utils/utils.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
+import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class Game {
   // Use list for maybe adding more players in future
@@ -39,6 +40,10 @@ class Game {
     final ChessPiece? piece = board[startRow][startColumn];
     final ChessPiece? target = board[endRow][endColumn];
 
+    print("GAME.DART");
+    print(piece?.colour.name);
+    print(server.myPieces);
+
     final (int, int) move = (
       moveToSquare.$1 - moveFromSquare.$1,
       moveToSquare.$2 - moveFromSquare.$2
@@ -48,6 +53,10 @@ class Game {
     if (target != null) {
       capturedPieces.add(target);
     }
+
+    // if (piece!.colour.name  server.myPieces) {
+
+    // }
 
     // en-passant's capture
     if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
