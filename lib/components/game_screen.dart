@@ -68,7 +68,11 @@ class _GameScreenState extends State<GameScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
           const Spacer(),
-          WhiteCapturedPieces(game: game),
+          server.opponentPieces == "null"
+              ? const Center(child: CircularProgressIndicator())
+              : server.opponentPieces == "white"
+                  ? BlackCapturedPieces(game: game)
+                  : WhiteCapturedPieces(game: game),
           const Spacer(),
           Container(
               decoration: BoxDecoration(
@@ -87,7 +91,11 @@ class _GameScreenState extends State<GameScreen> {
                 setPromo: _setPromo,
               )),
           const Spacer(),
-          BlackCapturedPieces(game: game),
+          server.myPieces == "null"
+              ? const Center(child: CircularProgressIndicator())
+              : server.myPieces == "white"
+                  ? BlackCapturedPieces(game: game)
+                  : WhiteCapturedPieces(game: game),
           const Spacer(),
           Text(
             widget.username,
