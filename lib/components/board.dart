@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
@@ -11,12 +12,14 @@ class Board extends StatefulWidget {
   final Game game;
   final Promo promo;
   final Function setPromo;
+  final BoardHighlights boardHighlights;
 
   const Board({
     super.key,
     required this.game,
     required this.promo,
     required this.setPromo,
+    required this.boardHighlights,
   });
 
   @override
@@ -27,11 +30,7 @@ class _BoardState extends State<Board> {
   final WebSocketService _webSocketService = WebSocketService();
 
   Set legalMoves = {};
-  Set checkers = {};
-  Set checkees = {};
   (int, int)? selected;
-  (int, int)? previousMoveStart;
-  (int, int)? previousMoveEnd;
 
   late final double tileWidth = MediaQuery.of(context).size.width / 8.0;
 
@@ -44,28 +43,31 @@ class _BoardState extends State<Board> {
 
       if (selected == null) {
         selected = (y, x);
+        widget.boardHighlights.selected = selected;
+
         legalMoves = widget.game.getLegalMoves((y, x));
+        widget.boardHighlights.legalMoves = legalMoves;
+
         // with piece selected
       } else {
         if (legalMoves.contains((y, x))) {
           ChessPiece? target = widget.game.board[y][x];
-
-          previousMoveStart = selected;
-          previousMoveEnd = (y, x);
 
           // widget.game.movePiece(selected!, (y, x));
 
           final selectedPiece = widget.game.board[selected!.$1][selected!.$2];
 
           if (selectedPiece!.colour.name == server.myPieces) {
+            widget.boardHighlights.previousMoveStart = selected;
+            widget.boardHighlights.previousMoveEnd = (y, x);
             _webSocketService
                 .sendMessage('move:${selected!.$1},${selected!.$2},$y,$x');
           } else {
             print("Not your piece");
           }
 
-          checkers = widget.game.getChecks('attackers');
-          checkees = widget.game.getChecks('kings');
+          widget.boardHighlights.checkers = widget.game.getChecks('attackers');
+          widget.boardHighlights.checkees = widget.game.getChecks('kings');
 
           if (widget.game.canPromote((y, x))) {
             widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
@@ -249,13 +251,15 @@ class _BoardState extends State<Board> {
   }
 
   getSquareBorder(y, x) {
-    if ((y, x) == previousMoveEnd || (y, x) == previousMoveStart) {
+    if ((y, x) == widget.boardHighlights.previousMoveEnd ||
+        (y, x) == widget.boardHighlights.previousMoveStart) {
       return Border.all(color: Colors.blue, width: 3);
     }
-    if (checkers.contains((y, x)) || checkees.contains((y, x))) {
+    if (widget.boardHighlights.checkers.contains((y, x)) ||
+        widget.boardHighlights.checkees.contains((y, x))) {
       return Border.all(color: Colors.red, width: 3);
     }
-    if (legalMoves.contains((y, x))) {
+    if (widget.boardHighlights.legalMoves.contains((y, x))) {
       return Border.all(color: Colors.black54);
     }
     return Border.all(color: Colors.black12);
