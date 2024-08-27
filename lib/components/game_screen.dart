@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board.dart';
-import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
 import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
+import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
@@ -18,7 +18,6 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   var game = Game();
-  var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
   final WebSocketService _webSocketService = WebSocketService();
@@ -33,21 +32,7 @@ class _GameScreenState extends State<GameScreen> {
 
   void _handleIncomingMessage(String message) {
     if (message.startsWith("move:")) {
-      var [startY, startX, endY, endX] = message
-          .substring(5)
-          .split(',')
-          .map((stringNum) => int.parse(stringNum))
-          .toList();
-      // Update the game state with the new move
-      setState(() {
-        game.movePiece((startY, startX), (endY, endX));
-
-        boardHighlights.previousMoveEnd = (endY, endX);
-        boardHighlights.previousMoveStart = (startY, startX);
-
-        boardHighlights.checkers = game.getChecks('attackers');
-        boardHighlights.checkees = game.getChecks('kings');
-      });
+      _handleMove(message);
     }
   }
 
@@ -67,6 +52,7 @@ class _GameScreenState extends State<GameScreen> {
       promo = newPromo;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +79,11 @@ class _GameScreenState extends State<GameScreen> {
         ),
         body: Column(children: [
           const Spacer(),
-          Text("Hello, ${widget.username}"),
-          const Spacer(),
           Text(
             '${gameStateMessageMap[game.gameState]}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
           const Spacer(),
-
           Text(
             "${server.opponentUsername}",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -111,7 +94,6 @@ class _GameScreenState extends State<GameScreen> {
               : server.opponentPieces == "white"
                   ? BlackCapturedPieces(game: game)
                   : WhiteCapturedPieces(game: game),
-
           const Spacer(),
           Container(
               decoration: BoxDecoration(
@@ -128,10 +110,8 @@ class _GameScreenState extends State<GameScreen> {
                 game: game,
                 promo: promo,
                 setPromo: _setPromo,
-                boardHighlights: boardHighlights,
               )),
           const Spacer(),
-
           server.myPieces == "null"
               ? const Center(child: CircularProgressIndicator())
               : server.myPieces == "white"
@@ -142,7 +122,6 @@ class _GameScreenState extends State<GameScreen> {
             "${server.myUsername}",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-
           const Spacer(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
@@ -151,7 +130,6 @@ class _GameScreenState extends State<GameScreen> {
               onPressed: () {
                 setState(() {
                   game = Game();
-                  boardHighlights = BoardHighlights();
                 });
               },
               child: const Text('Reset')),
@@ -233,10 +211,41 @@ class _GameScreenState extends State<GameScreen> {
   }
 }
 
+class BlackCapturedPieces extends StatelessWidget {
+  const BlackCapturedPieces({
+    super.key,
+    required this.game,
+  });
+
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return CapturedPieceDisplay(
+        capturedPieces: game.capturedPieces, colour: PieceColour.black);
+  }
+}
+
+class WhiteCapturedPieces extends StatelessWidget {
+  const WhiteCapturedPieces({
+    super.key,
+    required this.game,
+  });
+
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return CapturedPieceDisplay(
+        capturedPieces: game.capturedPieces, colour: PieceColour.white);
+  }
+}
+
 Map<GameState, String> gameStateMessageMap = {
   GameState.whiteToMove: 'White To Move',
   GameState.blackToMove: 'Black To Move',
   GameState.whiteWin: 'White Wins!',
   GameState.blackWin: 'Black Wins!',
   GameState.draw: 'Draw',
+  GameState.hasGameStarted: "false"
 };
