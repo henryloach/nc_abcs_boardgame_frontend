@@ -57,7 +57,14 @@ class _BoardState extends State<Board> {
               widget.game.board[widget.boardHighlights.selected!.$1]
                   [widget.boardHighlights.selected!.$2];
 
-          print('selected: $selectedPiece');
+          widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
+
+          if (widget.game.canPromote((y, x)) &&
+              selectedPiece!.colour.name == server.myPieces) {
+            widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
+          } else {
+            widget.setPromo(Promo(row: null, column: null, isMenuOpen: false));
+          }
 
           if (selectedPiece!.colour.name == server.myPieces ||
               widget.networkOption == NetworkOption.oneComputer) {
@@ -71,19 +78,9 @@ class _BoardState extends State<Board> {
           } else {
             print("Not your piece");
           }
-          
-          if (widget.networkOption == NetworkOption.oneComputer) {
-            widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
-          }
 
           widget.boardHighlights.checkers = widget.game.getChecks('attackers');
           widget.boardHighlights.checkees = widget.game.getChecks('kings');
-
-          if (widget.game.canPromote((y, x))) {
-            widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
-          } else {
-            widget.setPromo(Promo(row: null, column: null, isMenuOpen: false));
-          }
 
           if (target != null) {
             showPopup(
