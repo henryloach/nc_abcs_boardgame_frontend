@@ -46,25 +46,26 @@ class _LoginScreenState extends State<LoginScreen> {
   _input(context, webSocketService) {
     final controller = TextEditingController();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-              hintText: "Username",
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none),
-              fillColor: Colors.purple.withOpacity(0.1),
-              filled: true,
-              prefixIcon: const Icon(Icons.person)),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        ElevatedButton(
-          onPressed: () {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+            hintText: "Username",
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none),
+            fillColor: Colors.purple.withOpacity(0.1),
+            filled: true,
+            prefixIcon: const Icon(Icons.person)),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      ElevatedButton(
+        onPressed: () {
+          if (controller.text.isNotEmpty) {
             user.username = controller.text;
             if (networkOption == NetworkOption.network) {
               webSocketService.sendMessage('user:${user.username}');
@@ -75,16 +76,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     builder: (context) => GameScreen(
                         username: controller.text,
                         networkOption: networkOption!)));
-          },
-          style: ElevatedButton.styleFrom(
+          } else {
+            showDialog(
+              context: context,
+              builder: (_) => const AlertDialog(
+                title: Text('Please enter your username'),
+              ),
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: Colors.purple,
-          ),
-          child: const Text(
+            ),     
+        child: const Text(
             "Start the game",
             style: TextStyle(fontSize: 20, color: Colors.white),
           ),
+
         ),
         const SizedBox(height: 10),
         Column(
