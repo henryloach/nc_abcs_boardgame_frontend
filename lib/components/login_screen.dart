@@ -39,6 +39,7 @@ _header(context) {
 
 _input(context, webSocketService) {
   final controller = TextEditingController();
+  NetworkOption? networkOption = NetworkOption.network;
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -76,9 +77,40 @@ _input(context, webSocketService) {
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
+      const SizedBox(height: 10),
+      Column(
+      children: <Widget>[
+        ListTile(
+          title: const Text('Play On Network'),
+          leading: Radio<NetworkOption>(
+            value: NetworkOption.network,
+            groupValue: networkOption,
+            onChanged: (NetworkOption? value) {
+             // setState(() {
+                networkOption = value;
+             // });
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Play On One Computer'),
+          leading: Radio<NetworkOption>(
+            value: NetworkOption.oneComputer,
+            groupValue: networkOption,
+            onChanged: (NetworkOption? value) {
+            //  setState(() {
+                networkOption = value;
+            //  })
+            },
+          ),
+        ),
+      ],
+    ),
     ],
   );
 }
+
+enum NetworkOption { network, oneComputer }
 
 
 // move: move
