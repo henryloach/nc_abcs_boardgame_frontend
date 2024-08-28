@@ -93,10 +93,12 @@ class Game {
 
     if (piece.type == PieceType.king && move.$2 == -2) {
       movePiece((startRow, 0), (startRow, 3));
+      swapTurn();
     }
 
     if (piece.type == PieceType.king && move.$2 == 2) {
       movePiece((startRow, 7), (startRow, 5));
+      swapTurn();
     }
 
     // move selected piece to the end square;
@@ -203,7 +205,6 @@ class Game {
         // board bounds check
         if (y >= boardHeight || y < 0) break;
         if (x >= boardWidth || x < 0) break;
-
 
         // get the piece(or null) at the target coordinates
         final ChessPiece? targetPiece = board[y][x];
