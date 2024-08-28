@@ -58,9 +58,9 @@ class Game {
     final ChessPiece? piece = board[startRow][startColumn];
     final ChessPiece? target = board[endRow][endColumn];
 
-    print("GAME.DART");
-    print(piece?.colour.name);
-    print(server.myPieces);
+    // print("GAME.DART");
+    // print(piece?.colour.name);
+    // print(server.myPieces);
 
     final (int, int) move = (
       moveToSquare.$1 - moveFromSquare.$1,

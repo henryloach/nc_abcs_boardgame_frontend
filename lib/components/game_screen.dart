@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
 import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
+import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
@@ -12,7 +13,9 @@ import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
-  const GameScreen({super.key, required this.username});
+  final NetworkOption networkOption;
+  const GameScreen(
+      {super.key, required this.username, required this.networkOption});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -34,7 +37,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _handleIncomingMessage(String message) {
-    if (message.startsWith("move:")) {
+    if (message.startsWith("move:") &&
+        widget.networkOption == NetworkOption.network) {
       _handleMove(message);
     }
   }
@@ -98,15 +102,18 @@ class _GameScreenState extends State<GameScreen> {
           ),
           const Spacer(),
           Text(
-            "${server.opponentUsername}",
+            widget.networkOption == NetworkOption.oneComputer
+                ? "black"
+                : "${server.opponentUsername}",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
-          server.opponentPieces == "null"
+          server.opponentPieces == "null" &&
+                  widget.networkOption == NetworkOption.network
               ? const Center(child: CircularProgressIndicator())
-              : server.opponentPieces == "white"
-                  ? BlackCapturedPieces(game: game)
-                  : WhiteCapturedPieces(game: game),
+              : server.opponentPieces == "black"
+                  ? WhiteCapturedPieces(game: game)
+                  : BlackCapturedPieces(game: game),
           const Spacer(),
           Container(
               decoration: BoxDecoration(
@@ -124,16 +131,20 @@ class _GameScreenState extends State<GameScreen> {
                 promo: promo,
                 setPromo: _setPromo,
                 boardHighlights: boardHighlights,
+                networkOption: widget.networkOption,
               )),
           const Spacer(),
-          server.myPieces == "null"
+          server.myPieces == "null" &&
+                  widget.networkOption == NetworkOption.network
               ? const Center(child: CircularProgressIndicator())
               : server.myPieces == "white"
                   ? BlackCapturedPieces(game: game)
                   : WhiteCapturedPieces(game: game),
           const Spacer(),
           Text(
-            "${server.myUsername}",
+            widget.networkOption == NetworkOption.oneComputer
+                ? "white"
+                : "${server.myUsername}",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
