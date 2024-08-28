@@ -32,9 +32,6 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   final WebSocketService _webSocketService = WebSocketService();
 
-  late final double tileWidth =
-      MediaQuery.of(context).size.width / widget.game.board[0].length;
-
   handleClick(y, x) {
     setState(() {
       // no piece selected already
@@ -71,7 +68,7 @@ class _BoardState extends State<Board> {
           } else {
             print("Not your piece");
           }
-          
+
           if (widget.networkOption == NetworkOption.oneComputer) {
             widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
           }
@@ -154,23 +151,26 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.networkOption == NetworkOption.oneComputer) {
-      return Column(
-        children: generateWhiteBoard,
-      );
-    }
-    // print(server.myPieces);
-    switch (server.myPieces) {
-      case "white":
-        return Column(children: generateWhiteBoard);
-      case "black":
-        return Column(children: generateBlackBoard);
-      default:
-        return const Center(child: CircularProgressIndicator());
-    }
+    return LayoutBuilder(builder: (context, constraints) {
+      double tileWidth = constraints.maxWidth / widget.game.board[0].length;
+      if (widget.networkOption == NetworkOption.oneComputer) {
+        return Column(
+          children: generateWhiteBoard(tileWidth),
+        );
+      }
+      // print(server.myPieces);
+      switch (server.myPieces) {
+        case "white":
+          return Column(children: generateWhiteBoard(tileWidth));
+        case "black":
+          return Column(children: generateBlackBoard(tileWidth));
+        default:
+          return const Center(child: CircularProgressIndicator());
+      }
+    });
   }
 
-  List<Widget> get generateWhiteBoard {
+  List<Widget> generateWhiteBoard(double tileWidth) {
     return [
       ...List.generate(
         widget.game.board.length,
@@ -213,7 +213,7 @@ class _BoardState extends State<Board> {
     ];
   }
 
-  List<Widget> get generateBlackBoard {
+  List<Widget> generateBlackBoard(double tileWidth) {
     return [
       ...List.generate(
         widget.game.board.length,
