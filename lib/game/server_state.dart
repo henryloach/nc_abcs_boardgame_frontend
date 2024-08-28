@@ -15,4 +15,4 @@ class ServerState {
   );
 }
 
-final server = ServerState(null, null, null, null, null, false);
+var server = ServerState(null, null, null, null, null, false);
