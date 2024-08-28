@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
+import 'package:nc_abcs_boardgame_frontend/game/rules.dart';
 import 'package:nc_abcs_boardgame_frontend/utils/websocket_service.dart';
 import 'package:nc_abcs_boardgame_frontend/game/user.dart';
+import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final WebSocketService _webSocketService = WebSocketService();
   final TextEditingController _usernameController = TextEditingController();
   NetworkOption _networkOption = NetworkOption.network;
+  GameVariant _selectedVariant = GameVariant.normal;
   bool _showInvalidUsername = false;
 
   @override
@@ -92,6 +95,8 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 24),
         _buildNetworkOptions(),
         const SizedBox(height: 24),
+        _buildGameVariantOptions(),
+        const SizedBox(height: 24),
         _buildStartGameButton(),
       ],
     );
@@ -127,6 +132,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildGameVariantOptions() {
+    return DropdownMenu<GameVariant>(
+        initialSelection: GameVariant.normal,
+        label: const Text('Game Variant'),
+        onSelected: (GameVariant? selected) {
+          setState(() {
+            _selectedVariant = selected!;
+          });
+        },
+        dropdownMenuEntries: GameVariant.values.map((value) {
+          return DropdownMenuEntry(value: value, label: value.name);
+        }).toList());
   }
 
   Widget _buildNetworkOptions() {
@@ -211,6 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return GameScreen(
             username: _usernameController.text,
             networkOption: _networkOption,
+            gameVariant: _selectedVariant,
           );
         },
       ),

@@ -14,22 +14,27 @@ import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 class GameScreen extends StatefulWidget {
   final String username;
   final NetworkOption networkOption;
+  final GameVariant gameVariant;
   const GameScreen(
-      {super.key, required this.username, required this.networkOption});
+      {super.key,
+      required this.username,
+      required this.networkOption,
+      required this.gameVariant});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  var game = Game(gameVariant: GameVariant.normal);
+  late Game game;
   var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
   final WebSocketService _webSocketService = WebSocketService();
-
   @override
   void initState() {
+    game = Game(gameVariant: widget.gameVariant);
+
     super.initState();
     _webSocketService.onMessageReceived = (message) {
       _handleIncomingMessage(message);
