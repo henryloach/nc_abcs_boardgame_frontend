@@ -13,201 +13,93 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final WebSocketService _webSocketService = WebSocketService();
-
-  NetworkOption? networkOption = NetworkOption.network;
-
-  final controller = TextEditingController();
-
-  final mainColor = Colors.red;
-
-  bool showInvalidUsername = false;
+  final TextEditingController _usernameController = TextEditingController();
+  NetworkOption _networkOption = NetworkOption.network;
+  bool _showInvalidUsername = false;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black87,
-          title: const Text(
-            "Northchess",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        body: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                const PawnIcon(),
-                const SizedBox(height: 10),
-                const Heading(),
-                const SizedBox(height: 32),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    InputField(controller: controller),
-                    if (showInvalidUsername) ...[
-                      const InvalidUsernameError(),
-                    ],
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Radio<NetworkOption>(
-                              value: NetworkOption.network,
-                              groupValue: networkOption,
-                              onChanged: (NetworkOption? value) {
-                                setState(() {
-                                  networkOption = value;
-                                });
-                              },
-                            ),
-                            const Text(
-                              'Multiplayer',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 16),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Radio<NetworkOption>(
-                              value: NetworkOption.oneComputer,
-                              groupValue: networkOption,
-                              onChanged: (NetworkOption? value) {
-                                setState(() {
-                                  networkOption = value;
-                                });
-                              },
-                            ),
-                            const Text(
-                              'Offline',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          showInvalidUsername = false;
-                        });
-                        if (controller.text.length > 2) {
-                          user.username = controller.text;
-                          if (networkOption == NetworkOption.network) {
-                            _webSocketService
-                                .sendMessage('user:${user.username}');
-                          }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GameScreen(
-                                username: controller.text,
-                                networkOption: networkOption!,
-                              ),
-                            ),
-                          );
-                        } else {
-                          setState(() {
-                            showInvalidUsername = true;
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: const RoundedRectangleBorder(),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.black87,
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 32),
-                        child: Text(
-                          "Start Game",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-              ],
-            ),
-          ),
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.black87,
+      title: const Text(
+        "Northchess",
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
     );
   }
-}
 
-class InvalidUsernameError extends StatelessWidget {
-  const InvalidUsernameError({
-    super.key,
-  });
+  Widget _buildBody() {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            _buildLogo(),
+            const SizedBox(height: 32),
+            _buildStartGameForm(),
+            const Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+  Widget _buildLogo() {
+    return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: Text(
-            "* Username cannot be less than 3 letters",
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-            ),
+        SvgPicture.asset(
+          "assets/svg/black-pawn.svg",
+          width: 100,
+          colorFilter: const ColorFilter.mode(
+            Colors.black87,
+            BlendMode.srcIn,
           ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Northchess",
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w900,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
-}
 
-class PawnIcon extends StatelessWidget {
-  const PawnIcon({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      "assets/svg/black-pawn.svg",
-      width: 100,
-      colorFilter: const ColorFilter.mode(
-        Colors.black87,
-        BlendMode.srcIn,
-      ),
+  Widget _buildStartGameForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildUsernameInput(),
+        if (_showInvalidUsername) _buildInvalidUsernameError(),
+        const SizedBox(height: 24),
+        _buildNetworkOptions(),
+        const SizedBox(height: 24),
+        _buildStartGameButton(),
+      ],
     );
   }
-}
 
-class InputField extends StatelessWidget {
-  const InputField({
-    super.key,
-    required this.controller,
-  });
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildUsernameInput() {
     return TextFormField(
-      controller: controller,
+      controller: _usernameController,
       decoration: InputDecoration(
         hintText: "Username",
         border: OutlineInputBorder(
@@ -219,36 +111,111 @@ class InputField extends StatelessWidget {
       ),
     );
   }
-}
 
-class Heading extends StatelessWidget {
-  const Heading({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      "Northchess",
-      style: TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.w900,
-        color: Colors.black87,
+  Widget _buildInvalidUsernameError() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          "* Username cannot be less than 3 letters",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
       ),
-      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildNetworkOptions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildNetworkOption(NetworkOption.network, 'Multiplayer'),
+        const SizedBox(width: 16),
+        _buildNetworkOption(NetworkOption.oneComputer, 'Offline'),
+      ],
+    );
+  }
+
+  Widget _buildNetworkOption(NetworkOption option, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio(
+          value: option,
+          groupValue: _networkOption,
+          onChanged: (NetworkOption? value) {
+            setState(() {
+              _networkOption = value!;
+            });
+          },
+        ),
+        Text(label, style: const TextStyle(fontSize: 16)),
+      ],
+    );
+  }
+
+  Widget _buildStartGameButton() {
+    return ElevatedButton(
+      onPressed: _handleStartGame,
+      style: ElevatedButton.styleFrom(
+        shape: const RoundedRectangleBorder(),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        backgroundColor: Colors.black87,
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32),
+        child: Text(
+          "Start Game",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleStartGame() {
+    setState(() {
+      _showInvalidUsername = false;
+    });
+
+    if (_isUsernameValid()) {
+      _startGame();
+    } else {
+      setState(() {
+        _showInvalidUsername = true;
+      });
+    }
+  }
+
+  bool _isUsernameValid() {
+    return _usernameController.text.length > 2;
+  }
+
+  void _startGame() {
+    user.username = _usernameController.text;
+
+    if (_networkOption == NetworkOption.network) {
+      _webSocketService.sendMessage('user:${user.username}');
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return GameScreen(
+            username: _usernameController.text,
+            networkOption: _networkOption,
+          );
+        },
+      ),
     );
   }
 }
 
 enum NetworkOption { network, oneComputer }
-
-
-// move: move
-// or
-// username:  
-// or
-// action: resign / offerDraw
-
-// [command, payload] = message.split(":")
-
-// if (command == move)  
