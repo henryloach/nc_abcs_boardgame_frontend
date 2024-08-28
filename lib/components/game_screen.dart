@@ -33,6 +33,8 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
     _webSocketService.onMessageReceived = (message) {
       _handleIncomingMessage(message);
+      _checkForPieceAssignment();
+      _checkForUsernameAssignment();
     };
   }
 
@@ -40,6 +42,28 @@ class _GameScreenState extends State<GameScreen> {
     if (message.startsWith("move:") &&
         widget.networkOption == NetworkOption.network) {
       _handleMove(message);
+    }
+  }
+
+  void _checkForPieceAssignment() {
+    if (server.myPieces == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {}); // rebuild or check again
+          _checkForPieceAssignment();
+        }
+      });
+    }
+  }
+
+  void _checkForUsernameAssignment() {
+    if (server.myUsername == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {});
+          _checkForUsernameAssignment();
+        }
+      });
     }
   }
 
@@ -92,7 +116,7 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("ABC's Chess"),
+          title: const Text("Northchess"),
         ),
         body: Column(children: [
           const Spacer(),
@@ -100,21 +124,23 @@ class _GameScreenState extends State<GameScreen> {
             '${gameStateMessageMap[game.gameState]}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
             widget.networkOption == NetworkOption.oneComputer
-                ? "black"
-                : "${server.opponentUsername}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ? "black"  
+                :server.opponentUsername ?? "Waiting for opponent...",
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const Spacer(),
-          server.opponentPieces == "null" &&
-                  widget.networkOption == NetworkOption.network
-              ? const Center(child: CircularProgressIndicator())
-              : server.opponentPieces == "black"
+          const SizedBox(height: 10),
+          server.opponentPieces == null && widget.networkOption == NetworkOption.network
+              ? const Text("")
+               : server.opponentPieces == "black"
                   ? WhiteCapturedPieces(game: game)
                   : BlackCapturedPieces(game: game),
-          const Spacer(),
+          const SizedBox(height: 10),
           Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -133,21 +159,24 @@ class _GameScreenState extends State<GameScreen> {
                 boardHighlights: boardHighlights,
                 networkOption: widget.networkOption,
               )),
-          const Spacer(),
-          server.myPieces == "null" &&
-                  widget.networkOption == NetworkOption.network
-              ? const Center(child: CircularProgressIndicator())
+
+          const SizedBox(height: 10),
+          server.myPieces == null && widget.networkOption == NetworkOption.network
+              ? const Text("")
               : server.myPieces == "white"
                   ? BlackCapturedPieces(game: game)
                   : WhiteCapturedPieces(game: game),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
             widget.networkOption == NetworkOption.oneComputer
                 ? "white"
-                : "${server.myUsername}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                : server.myUsername ?? "Joining...",
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],
