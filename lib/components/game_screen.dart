@@ -110,7 +110,14 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void handleResign() {
+  void handleExit() {
+    if (game.gameState == GameState.blackWin ||
+        game.gameState == GameState.whiteWin) {
+      _webSocketService.sendMessage("exit:exit");
+      server = ServerState(null, null, null, null, null, false);
+      return;
+    }
+
     _webSocketService.sendMessage("resign:resign");
     if (server.myPieces == "white") {
       setState(() {
@@ -122,12 +129,16 @@ class _GameScreenState extends State<GameScreen> {
         game.gameState = GameState.whiteWin;
       });
     }
+    server = ServerState(null, null, null, null, null, false);
     print("I resign!");
   }
 
   @override
   Widget build(BuildContext context) {
     //notification build widget
+    setState(() {
+      game = game;
+    });
 
     if (game.gameState == GameState.whiteWin) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -157,7 +168,7 @@ class _GameScreenState extends State<GameScreen> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              handleResign();
+              handleExit();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => LoginScreen(),
@@ -168,8 +179,12 @@ class _GameScreenState extends State<GameScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text("Resign"),
-          )
+            child: Text(game.gameState == GameState.whiteToMove ||
+                    game.gameState == GameState.blackToMove
+                ? "Resign"
+                : "Menu"),
+          ),
+          const SizedBox(width: 10),
         ],
       ),
       body: Column(
@@ -197,7 +212,7 @@ class _GameScreenState extends State<GameScreen> {
                       height: 32,
                       color: Colors.black12,
                     )
-                  : server.myPieces == "black"
+                  : server.myPieces == "white"
                       ? WhiteCapturedPieces(game: game)
                       : BlackCapturedPieces(game: game),
           Center(
@@ -217,7 +232,7 @@ class _GameScreenState extends State<GameScreen> {
                       height: 32,
                       color: Colors.black12,
                     )
-                  : server.opponentPieces == "white"
+                  : server.opponentPieces == "black"
                       ? BlackCapturedPieces(game: game)
                       : WhiteCapturedPieces(game: game),
           const SomeVerticalSpace(),
