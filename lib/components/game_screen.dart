@@ -43,6 +43,15 @@ class _GameScreenState extends State<GameScreen> {
         widget.networkOption == NetworkOption.network) {
       _handleMove(message);
     }
+    if (message.startsWith("promote:") &&
+        widget.networkOption == NetworkOption.network) {
+      print("from promate");
+      final [_, payload] = message.split(":");
+      final [row, column, pieceType] = payload.split(",");
+      setState(() {
+        game.promotePawn(int.parse(row), int.parse(column), pieceType);
+      });
+    }
   }
 
   void _checkForPieceAssignment() {
@@ -81,12 +90,6 @@ class _GameScreenState extends State<GameScreen> {
 
       boardHighlights.checkers = game.getChecks('attackers');
       boardHighlights.checkees = game.getChecks('kings');
-
-      if (game.canPromote((endY, endX))) {
-        _setPromo(Promo(row: endY, column: endX, isMenuOpen: true));
-      } else {
-        _setPromo(Promo(row: null, column: null, isMenuOpen: false));
-      }
     });
   }
 
@@ -266,6 +269,10 @@ class _GameScreenState extends State<GameScreen> {
                   child: IconButton(
                     onPressed: () {
                       if (promo.row != null && promo.column != null) {
+                        if (widget.networkOption == NetworkOption.network) {
+                          _webSocketService.sendMessage(
+                              'promote:${promo.row},${promo.column},$pieceType');
+                        }
                         game.promotePawn(promo.row!, promo.column!, pieceType);
                         setState(() {
                           promo.isMenuOpen = false;
