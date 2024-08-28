@@ -6,18 +6,27 @@ class CapturedPieceDisplay extends StatelessWidget {
   final List<ChessPiece> capturedPieces;
   final PieceColour colour;
 
-  const CapturedPieceDisplay({super.key, required this.capturedPieces, required this.colour});
+  const CapturedPieceDisplay(
+      {super.key, required this.capturedPieces, required this.colour});
 
   @override
   Widget build(BuildContext context) {
-        return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      ...capturedPieces
-          .where((piece) => piece.colour == colour)
-          .map((piece) => SvgPicture.asset(
-                "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
-                height: 25,
-                width: 25,
-              ))
-    ]);
+    return Container(
+      width: 360,
+      height: 30,
+      color: Colors.black12,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ...capturedPieces.where((piece) => piece.colour == colour).map(
+                (piece) => SvgPicture.asset(
+                  "assets/svg/${piece.colour.name}-${piece.type.name}.svg",
+                  height: 25,
+                  width: 25,
+                ),
+              ),
+        ],
+      ),
+    );
   }
 }

@@ -482,5 +482,5 @@ enum GameState {
   whiteWin,
   blackWin,
   draw,
-  hasGameStarted
+  hasGameStarted,
 }
