@@ -75,10 +75,12 @@ class Game {
     // en-passant's capture - repaired for the 'edge' cases - elementAtOrNull instead of using sq brackets
 
     if (piece!.type == PieceType.pawn && move.$2 != 0 && target == null) {
-      final ChessPiece? left =
-          board[moveFromSquare.$1].elementAtOrNull(moveFromSquare.$2 - 1);
-      final ChessPiece? right =
-          board[moveFromSquare.$1].elementAtOrNull(moveFromSquare.$2 + 1);
+      final ChessPiece? left = moveFromSquare.$2 > 0
+          ? board[moveFromSquare.$1][moveFromSquare.$2 - 1]
+          : null;
+      final ChessPiece? right = moveFromSquare.$2 < 7
+          ? board[moveFromSquare.$1][moveFromSquare.$2 + 1]
+          : null;
 
       if (left != null) {
         capturedPieces.add(left);
@@ -219,30 +221,6 @@ class Game {
 
           break;
         } else {
-          if (captureRule == CaptureRule.captureOnly)
-            break; // pawns can't move diagonaly, only capture
-
-          // square is available to move if it's empty
-          resultSet.add((y, x));
-
-          // pawn initial double-move
-          if (piece.type == PieceType.pawn &&
-              piece.hasMoved == false &&
-              board[y + dy][x + dx] == null) {
-            resultSet.add((y + dy, x + dx));
-          }
-
-          // "en passant"
-          // notes:
-          // the type of each piece
-          // the previous move for each piece (store this against the piece)
-          // validMoves: (for a pawn)
-          // check if the piece to the left or right is a pawn, and has a previous move of y +/- 2
-          // movePiece:
-          // [x] for a pawn
-          // [x] check if the move is diagonal and there is no piece in the square
-          // [x] check for a piece at y +/- 1 and capture that instead
-
           if (piece.type == PieceType.pawn) {
             // vm = vertical move
             final vm = piece.colour == PieceColour.white ? -1 : 1;
@@ -267,6 +245,30 @@ class Game {
               resultSet.add((row + vm, column + 1));
             }
           }
+
+          if (captureRule == CaptureRule.captureOnly)
+            break; // pawns can't move diagonaly, only capture
+
+          // square is available to move if it's empty
+          resultSet.add((y, x));
+
+          // pawn initial double-move
+          if (piece.type == PieceType.pawn &&
+              piece.hasMoved == false &&
+              board[y + dy][x + dx] == null) {
+            resultSet.add((y + dy, x + dx));
+          }
+
+          // "en passant"
+          // notes:
+          // the type of each piece
+          // the previous move for each piece (store this against the piece)
+          // validMoves: (for a pawn)
+          // check if the piece to the left or right is a pawn, and has a previous move of y +/- 2
+          // movePiece:
+          // [x] for a pawn
+          // [x] check if the move is diagonal and there is no piece in the square
+          // [x] check for a piece at y +/- 1 and capture that instead
 
           // If the king hasn't moved
           // If the rook on either side hasn't moved
