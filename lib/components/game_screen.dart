@@ -45,12 +45,23 @@ class _GameScreenState extends State<GameScreen> {
     }
     if (message.startsWith("promote:") &&
         widget.networkOption == NetworkOption.network) {
-      print("from promate");
       final [_, payload] = message.split(":");
       final [row, column, pieceType] = payload.split(",");
       setState(() {
         game.promotePawn(int.parse(row), int.parse(column), pieceType);
       });
+    }
+    if (message.startsWith("opponent-resigned")) {
+      if (server.myPieces == "white") {
+        setState(() {
+          game.gameState = GameState.whiteWin;
+        });
+      }
+      if (server.myPieces == "black") {
+        setState(() {
+          game.gameState = GameState.blackWin;
+        });
+      }
     }
   }
 
@@ -101,6 +112,16 @@ class _GameScreenState extends State<GameScreen> {
 
   void handleResign() {
     _webSocketService.sendMessage("resign:resign");
+    if (server.myPieces == "white") {
+      setState(() {
+        game.gameState = GameState.blackWin;
+      });
+    }
+    if (server.myPieces == "black") {
+      setState(() {
+        game.gameState = GameState.whiteWin;
+      });
+    }
     print("I resign!");
   }
 
@@ -176,7 +197,7 @@ class _GameScreenState extends State<GameScreen> {
                       height: 32,
                       color: Colors.black12,
                     )
-                  : server.opponentPieces == "black"
+                  : server.myPieces == "black"
                       ? WhiteCapturedPieces(game: game)
                       : BlackCapturedPieces(game: game),
           Center(
@@ -380,16 +401,23 @@ Map<GameState, String> gameStateMessageMap = {
 String gameStateMessage(gameState, server) {
   switch (server.myPieces) {
     case "white":
-      if (gameState == GameState.whiteToMove) {
-        return "Your turn...";
-      } else {
-        return "Opponent's turn...";
+      switch (gameState) {
+        case GameState.whiteToMove:
+          return "Your turn...";
+        case GameState.blackToMove:
+          return "Opponent's turn...";
+        default:
+          return "game over";
       }
+
     case "black":
-      if (gameState == GameState.whiteToMove) {
-        return "Opponent's turn...";
-      } else {
-        return "Your turn...";
+      switch (gameState) {
+        case GameState.blackToMove:
+          return "Your turn...";
+        case GameState.whiteToMove:
+          return "Opponent's turn...";
+        default:
+          return "game over";
       }
   }
   return "Enjoy game!";
