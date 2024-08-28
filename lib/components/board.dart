@@ -73,7 +73,8 @@ class _BoardState extends State<Board> {
           }
 
           if (widget.game.canPromote((y, x)) &&
-              selectedPiece!.colour.name == server.myPieces) {
+              (selectedPiece.colour.name == server.myPieces ||
+                  widget.networkOption == NetworkOption.oneComputer)) {
             widget.setPromo(Promo(row: y, column: x, isMenuOpen: true));
           } else {
             widget.setPromo(Promo(row: null, column: null, isMenuOpen: false));
