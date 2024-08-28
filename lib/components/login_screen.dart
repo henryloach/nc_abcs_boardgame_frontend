@@ -43,7 +43,7 @@ _input(context, webSocketService) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      TextField(
+      TextFormField(
         controller: controller,
         decoration: InputDecoration(
             hintText: "Username",
@@ -59,12 +59,22 @@ _input(context, webSocketService) {
       ),
       ElevatedButton(
         onPressed: () {
-          user.username = controller.text;
-          webSocketService.sendMessage('user:${user.username}');
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => GameScreen(username: controller.text)));
+          if (controller.text.isNotEmpty) {
+            user.username = controller.text;
+            webSocketService.sendMessage('user:${user.username}');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        GameScreen(username: controller.text)));
+          } else {
+            showDialog(
+              context: context,
+              builder: (_) => const AlertDialog(
+                title: Text('Please enter your username'),
+              ),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           shape: const StadiumBorder(),
