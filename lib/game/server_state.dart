@@ -4,8 +4,15 @@ class ServerState {
   String? opponentUsername;
   String? opponentPieces;
   String? action;
-  ServerState(this.myUsername, this.myPieces, this.opponentUsername,
-      this.opponentPieces, this.action);
+  bool? opponentResigned;
+  ServerState(
+    this.myUsername,
+    this.myPieces,
+    this.opponentUsername,
+    this.opponentPieces,
+    this.action,
+    this.opponentResigned,
+  );
 }
 
-final server = ServerState(null, null, null, null, null);
+final server = ServerState(null, null, null, null, null, false);

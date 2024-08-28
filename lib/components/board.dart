@@ -152,22 +152,48 @@ class _BoardState extends State<Board> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      double tileWidth = constraints.maxWidth / widget.game.board[0].length;
+      // double tileWidth = constraints.maxWidth / widget.game.board[0].length;
+      double tileWidth = 45;
       if (widget.networkOption == NetworkOption.oneComputer) {
-        return Column(
-          children: generateWhiteBoard(tileWidth),
-        );
+        return generateBoard("white", tileWidth);
       }
       // print(server.myPieces);
       switch (server.myPieces) {
         case "white":
-          return Column(children: generateWhiteBoard(tileWidth));
+          return generateBoard("white", tileWidth);
         case "black":
-          return Column(children: generateBlackBoard(tileWidth));
+          return generateBoard("black", tileWidth);
         default:
           return const Center(child: CircularProgressIndicator());
       }
     });
+  }
+
+  IntrinsicWidth generateBoard(String colour, double tileWidth) {
+    return IntrinsicWidth(
+      child: Container(
+        width: 360,
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              spreadRadius: 2,
+              blurRadius: 8,
+            )
+          ],
+        ),
+        child: Column(
+          // children: generateBlackBoard(tileWidth),
+          children: [
+            if (colour == "black") ...[
+              ...generateBlackBoard(tileWidth)
+            ] else if (colour == "white") ...[
+              ...generateWhiteBoard(tileWidth)
+            ]
+          ],
+        ),
+      ),
+    );
   }
 
   List<Widget> generateWhiteBoard(double tileWidth) {

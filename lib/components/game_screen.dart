@@ -96,6 +96,11 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  void handleResign() {
+    _webSocketService.sendMessage("resign:resign");
+    print("I resign!");
+  }
+
   @override
   Widget build(BuildContext context) {
     //notification build widget
@@ -114,82 +119,131 @@ class _GameScreenState extends State<GameScreen> {
       });
     }
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text("Northchess"),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.black87,
+        title: const Text(
+          "Northchess",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-        body: Column(children: [
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              handleResign();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => LoginScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Resign"),
+          )
+        ],
+      ),
+      body: Column(
+        children: [
           const Spacer(),
-          Text(
-            '${gameStateMessageMap[game.gameState]}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            widget.networkOption == NetworkOption.oneComputer
-                ? "black"  
-                :server.opponentUsername ?? "Waiting for opponent...",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          server.opponentPieces == null && widget.networkOption == NetworkOption.network
-              ? const Text("")
-               : server.opponentPieces == "black"
-                  ? WhiteCapturedPieces(game: game)
-                  : BlackCapturedPieces(game: game),
-          const SizedBox(height: 10),
-          Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          SizedBox(
+            width: 360,
+            child: Text(
+              widget.networkOption == NetworkOption.oneComputer
+                  ? "black"
+                  : server.opponentUsername ?? "Waiting for opponent...",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-              child: Board(
-                game: game,
-                promo: promo,
-                setPromo: _setPromo,
-                boardHighlights: boardHighlights,
-                networkOption: widget.networkOption,
-              )),
-
-          const SizedBox(height: 10),
-          server.myPieces == null && widget.networkOption == NetworkOption.network
-              ? const Text("")
-              : server.myPieces == "white"
-                  ? BlackCapturedPieces(game: game)
-                  : WhiteCapturedPieces(game: game),
-          const SizedBox(height: 10),
-          Text(
-            widget.networkOption == NetworkOption.oneComputer
-                ? "white"
-                : server.myUsername ?? "Joining...",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              textAlign: TextAlign.left,
             ),
           ),
-          const SizedBox(height: 10),
+          const SomeVerticalSpace(),
+          widget.networkOption != NetworkOption.network
+              ? WhiteCapturedPieces(game: game)
+              : server.opponentPieces == null
+                  ? Container(
+                      width: 360,
+                      height: 32,
+                      color: Colors.black12,
+                    )
+                  : server.opponentPieces == "black"
+                      ? WhiteCapturedPieces(game: game)
+                      : BlackCapturedPieces(game: game),
+          Center(
+            child: Board(
+              game: game,
+              promo: promo,
+              setPromo: _setPromo,
+              boardHighlights: boardHighlights,
+              networkOption: widget.networkOption,
+            ),
+          ),
+          widget.networkOption != NetworkOption.network
+              ? BlackCapturedPieces(game: game)
+              : server.opponentPieces == null
+                  ? Container(
+                      width: 360,
+                      height: 32,
+                      color: Colors.black12,
+                    )
+                  : server.opponentPieces == "white"
+                      ? BlackCapturedPieces(game: game)
+                      : WhiteCapturedPieces(game: game),
+          const SomeVerticalSpace(),
+          SizedBox(
+            width: 360,
+            child: Text(
+              widget.networkOption == NetworkOption.oneComputer
+                  ? "white"
+                  : server.myUsername ?? "Joining...",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          const SomeVerticalSpace(),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],
           ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  game = Game(gameVariant: GameVariant.normal);
-                  boardHighlights = BoardHighlights();
-                });
-              },
-              child: const Text('Reset')),
+            onPressed: () {
+              setState(() {
+                game = Game(gameVariant: GameVariant.normal);
+                boardHighlights = BoardHighlights();
+              });
+            },
+            child: const Text('Reset'),
+          ),
+          const SomeVerticalSpace(),
           const Spacer(),
-        ]));
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            color: Colors.black87,
+            child: Text(
+              // '${gameStateMessageMap[game.gameState]}',
+              gameStateMessage(game.gameState, server),
+              style: const TextStyle(
+                // fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                fontSize: 16,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Container openPromoMenu() {
@@ -266,6 +320,17 @@ class _GameScreenState extends State<GameScreen> {
   }
 }
 
+class SomeVerticalSpace extends StatelessWidget {
+  const SomeVerticalSpace({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(height: 10);
+  }
+}
+
 class BlackCapturedPieces extends StatelessWidget {
   const BlackCapturedPieces({
     super.key,
@@ -304,3 +369,21 @@ Map<GameState, String> gameStateMessageMap = {
   GameState.draw: 'Draw',
   GameState.hasGameStarted: "false"
 };
+
+String gameStateMessage(gameState, server) {
+  switch (server.myPieces) {
+    case "white":
+      if (gameState == GameState.whiteToMove) {
+        return "Your turn...";
+      } else {
+        return "Opponent's turn...";
+      }
+    case "black":
+      if (gameState == GameState.whiteToMove) {
+        return "Opponent's turn...";
+      } else {
+        return "Your turn...";
+      }
+  }
+  return "Enjoy game!";
+}

@@ -48,6 +48,9 @@ class WebSocketService {
                 print(
                     "ot: ${server.opponentUsername}, ${server.opponentPieces}");
               }
+            } else if (message == "opponent-resigned") {
+              server.opponentResigned = true;
+              print("Opponent resigned");
             }
           }
         },

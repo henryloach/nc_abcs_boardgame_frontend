@@ -204,7 +204,6 @@ class Game {
         if (y >= boardHeight || y < 0) break;
         if (x >= boardWidth || x < 0) break;
 
-
         // get the piece(or null) at the target coordinates
         final ChessPiece? targetPiece = board[y][x];
 
@@ -481,5 +480,5 @@ enum GameState {
   whiteWin,
   blackWin,
   draw,
-  hasGameStarted
+  hasGameStarted,
 }
