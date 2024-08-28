@@ -11,13 +11,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Game Screen',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
-        home: LoginScreen());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: LoginScreen(),
+    );
   }
 }
