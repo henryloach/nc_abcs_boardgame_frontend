@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
 import 'package:nc_abcs_boardgame_frontend/components/captured_piece_display.dart';
+import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
@@ -12,7 +13,9 @@ import 'package:nc_abcs_boardgame_frontend/game/server_state.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
-  const GameScreen({super.key, required this.username});
+  final NetworkOption networkOption;
+  const GameScreen(
+      {super.key, required this.username, required this.networkOption});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -30,12 +33,37 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
     _webSocketService.onMessageReceived = (message) {
       _handleIncomingMessage(message);
+      _checkForPieceAssignment();
+      _checkForUsernameAssignment();
     };
   }
 
   void _handleIncomingMessage(String message) {
-    if (message.startsWith("move:")) {
+    if (message.startsWith("move:") &&
+        widget.networkOption == NetworkOption.network) {
       _handleMove(message);
+    }
+  }
+
+  void _checkForPieceAssignment() {
+    if (server.myPieces == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {}); // rebuild or check again
+          _checkForPieceAssignment();
+        }
+      });
+    }
+  }
+
+  void _checkForUsernameAssignment() {
+    if (server.myUsername == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {});
+          _checkForUsernameAssignment();
+        }
+      });
     }
   }
 
@@ -88,7 +116,7 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("ABC's Chess"),
+          title: const Text("Northchess"),
         ),
         body: Column(children: [
           const Spacer(),
@@ -96,18 +124,23 @@ class _GameScreenState extends State<GameScreen> {
             '${gameStateMessageMap[game.gameState]}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
-            "${server.opponentUsername}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            widget.networkOption == NetworkOption.oneComputer
+                ? "black"  
+                :server.opponentUsername ?? "Waiting for opponent...",
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const Spacer(),
-          server.opponentPieces == "null"
-              ? const Center(child: CircularProgressIndicator())
-              : server.opponentPieces == "white"
-                  ? BlackCapturedPieces(game: game)
-                  : WhiteCapturedPieces(game: game),
-          const Spacer(),
+          const SizedBox(height: 10),
+          server.opponentPieces == null && widget.networkOption == NetworkOption.network
+              ? const Text("")
+               : server.opponentPieces == "black"
+                  ? WhiteCapturedPieces(game: game)
+                  : BlackCapturedPieces(game: game),
+          const SizedBox(height: 10),
           Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -124,19 +157,26 @@ class _GameScreenState extends State<GameScreen> {
                 promo: promo,
                 setPromo: _setPromo,
                 boardHighlights: boardHighlights,
+                networkOption: widget.networkOption,
               )),
-          const Spacer(),
-          server.myPieces == "null"
-              ? const Center(child: CircularProgressIndicator())
+
+          const SizedBox(height: 10),
+          server.myPieces == null && widget.networkOption == NetworkOption.network
+              ? const Text("")
               : server.myPieces == "white"
                   ? BlackCapturedPieces(game: game)
                   : WhiteCapturedPieces(game: game),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
-            "${server.myUsername}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            widget.networkOption == NetworkOption.oneComputer
+                ? "white"
+                : server.myUsername ?? "Joining...",
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],

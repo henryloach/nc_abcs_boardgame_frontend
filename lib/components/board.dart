@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
+import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
 import 'package:nc_abcs_boardgame_frontend/game/game.dart';
@@ -13,6 +14,7 @@ class Board extends StatefulWidget {
   final Promo promo;
   final Function setPromo;
   final BoardHighlights boardHighlights;
+  final NetworkOption networkOption;
 
   const Board({
     super.key,
@@ -20,6 +22,7 @@ class Board extends StatefulWidget {
     required this.promo,
     required this.setPromo,
     required this.boardHighlights,
+    required this.networkOption,
   });
 
   @override
@@ -29,12 +32,14 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   final WebSocketService _webSocketService = WebSocketService();
 
-  late final double tileWidth = MediaQuery.of(context).size.width / widget.game.board[0].length;
+  late final double tileWidth =
+      MediaQuery.of(context).size.width / widget.game.board[0].length;
 
   handleClick(y, x) {
     setState(() {
       // no piece selected already
-      if (widget.boardHighlights.selected == null && widget.game.board[y][x] == null) return;
+      if (widget.boardHighlights.selected == null &&
+          widget.game.board[y][x] == null) return;
       if (widget.boardHighlights.selected == null &&
           !widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) return;
 
@@ -48,17 +53,27 @@ class _BoardState extends State<Board> {
         if (widget.boardHighlights.legalMoves.contains((y, x))) {
           ChessPiece? target = widget.game.board[y][x];
 
-          // widget.game.movePiece(selected!, (y, x));
+          final selectedPiece =
+              widget.game.board[widget.boardHighlights.selected!.$1]
+                  [widget.boardHighlights.selected!.$2];
 
-          final selectedPiece = widget.game.board[widget.boardHighlights.selected!.$1][widget.boardHighlights.selected!.$2];
+          print('selected: $selectedPiece');
 
-          if (selectedPiece!.colour.name == server.myPieces) {
-            widget.boardHighlights.previousMoveStart = widget.boardHighlights.selected;
+          if (selectedPiece!.colour.name == server.myPieces ||
+              widget.networkOption == NetworkOption.oneComputer) {
+            widget.boardHighlights.previousMoveStart =
+                widget.boardHighlights.selected;
             widget.boardHighlights.previousMoveEnd = (y, x);
-            _webSocketService
-                .sendMessage('move:${widget.boardHighlights.selected!.$1},${widget.boardHighlights.selected!.$2},$y,$x');
+            if (widget.networkOption == NetworkOption.network) {
+              _webSocketService.sendMessage(
+                  'move:${widget.boardHighlights.selected!.$1},${widget.boardHighlights.selected!.$2},$y,$x');
+            }
           } else {
             print("Not your piece");
+          }
+          
+          if (widget.networkOption == NetworkOption.oneComputer) {
+            widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
           }
 
           widget.boardHighlights.checkers = widget.game.getChecks('attackers');
@@ -88,7 +103,8 @@ class _BoardState extends State<Board> {
           if (widget.boardHighlights.selected != (y, x) &&
               widget.game.doesPieceAtSquareBelongToActivePlayer(y, x)) {
             widget.boardHighlights.selected = (y, x);
-            widget.boardHighlights.legalMoves = widget.game.getLegalMoves((y, x));
+            widget.boardHighlights.legalMoves =
+                widget.game.getLegalMoves((y, x));
           } else {
             showPopup(message: 'Invalid move!', backgroundColor: Colors.red);
             widget.boardHighlights.legalMoves = {};
@@ -138,6 +154,11 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.networkOption == NetworkOption.oneComputer) {
+      return Column(
+        children: generateWhiteBoard,
+      );
+    }
     // print(server.myPieces);
     switch (server.myPieces) {
       case "white":
