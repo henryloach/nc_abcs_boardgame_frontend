@@ -176,7 +176,7 @@ class _GameScreenState extends State<GameScreen> {
               handleExit();
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
+                  builder: (context) => const LoginScreen(),
                 ),
               );
             },
@@ -261,7 +261,7 @@ class _GameScreenState extends State<GameScreen> {
           ElevatedButton(
             onPressed: () {
               setState(() {
-                game = Game(gameVariant: GameVariant.normal);
+                game = Game(gameVariant: widget.gameVariant);
                 boardHighlights = BoardHighlights();
               });
             },
