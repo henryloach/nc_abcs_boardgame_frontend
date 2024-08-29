@@ -311,6 +311,7 @@ class _GameScreenState extends State<GameScreen> {
 
   Container openPromoMenu() {
     return Container(
+      width: widgetWidth,
       color: const Color.fromARGB(255, 39, 3, 0),
       padding: const EdgeInsets.all(30),
       child: Column(
