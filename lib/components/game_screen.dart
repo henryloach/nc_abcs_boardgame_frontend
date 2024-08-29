@@ -44,6 +44,13 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _handleIncomingMessage(String message) {
+    if (message.startsWith('user')) {
+      final [_, name, _] = message.split(":");
+      if (name == widget.username) return;
+      setState(() {
+        server.opponentUsername = name;
+      });
+    }
     if (message.startsWith("move:") &&
         widget.networkOption == NetworkOption.network) {
       _handleMove(message);
