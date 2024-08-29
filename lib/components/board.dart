@@ -38,8 +38,7 @@ class _BoardState extends State<Board> {
   handleClick(y, x) {
     setState(() {
       // no piece selected already
-      if (server.opponentUsername == null ||
-          server.opponentUsername == 'Waiting for opponent...') return;
+      if (server.opponentUsername == null && widget.networkOption == NetworkOption.network) return;
       if (widget.boardHighlights.selected == null &&
           widget.game.board[y][x] == null) return;
       if (widget.boardHighlights.selected == null &&
@@ -47,7 +46,6 @@ class _BoardState extends State<Board> {
 
       if (widget.boardHighlights.selected == null) {
         widget.boardHighlights.selected = (y, x);
-
         widget.boardHighlights.legalMoves = widget.game.getLegalMoves((y, x));
 
         // with piece selected
