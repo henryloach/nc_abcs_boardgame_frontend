@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nc_abcs_boardgame_frontend/components/board_highlights.dart';
+import 'package:nc_abcs_boardgame_frontend/components/game_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/components/login_screen.dart';
 import 'package:nc_abcs_boardgame_frontend/components/promo.dart';
 import 'package:nc_abcs_boardgame_frontend/game/chess_piece.dart';
@@ -15,6 +16,8 @@ class Board extends StatefulWidget {
   final Function setPromo;
   final BoardHighlights boardHighlights;
   final NetworkOption networkOption;
+
+  final double widetWidth = 411.2;
 
   const Board({
     super.key,
@@ -43,7 +46,6 @@ class _BoardState extends State<Board> {
 
       if (widget.boardHighlights.selected == null) {
         widget.boardHighlights.selected = (y, x);
-
         widget.boardHighlights.legalMoves = widget.game.getLegalMoves((y, x));
 
         // with piece selected
@@ -64,7 +66,7 @@ class _BoardState extends State<Board> {
             widget.boardHighlights.previousMoveStart =
                 widget.boardHighlights.selected;
             widget.boardHighlights.previousMoveEnd = (y, x);
-            if (widget.networkOption == NetworkOption.network ) {
+            if (widget.networkOption == NetworkOption.network) {
               widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
               _webSocketService.sendMessage(
                   'move:${widget.boardHighlights.selected!.$1},${widget.boardHighlights.selected!.$2},$y,$x');
@@ -155,7 +157,8 @@ class _BoardState extends State<Board> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       // double tileWidth = constraints.maxWidth / widget.game.board[0].length;
-      double tileWidth = 45;
+      double tileWidth = 51.4;
+      // double tileWidth = widgetWidth / widget.game.board[0].length;
       if (widget.networkOption == NetworkOption.oneComputer) {
         return generateBoard("white", tileWidth);
       }
@@ -171,29 +174,27 @@ class _BoardState extends State<Board> {
     });
   }
 
-  IntrinsicWidth generateBoard(String colour, double tileWidth) {
-    return IntrinsicWidth(
-      child: Container(
-        width: 360,
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              spreadRadius: 2,
-              blurRadius: 8,
-            )
-          ],
-        ),
-        child: Column(
-          // children: generateBlackBoard(tileWidth),
-          children: [
-            if (colour == "black") ...[
-              ...generateBlackBoard(tileWidth)
-            ] else if (colour == "white") ...[
-              ...generateWhiteBoard(tileWidth)
-            ]
-          ],
-        ),
+  Container generateBoard(String colour, double tileWidth) {
+    return Container(
+      width: widgetWidth,
+      decoration: const BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            spreadRadius: 2,
+            blurRadius: 8,
+          )
+        ],
+      ),
+      child: Column(
+        // children: generateBlackBoard(tileWidth),
+        children: [
+          if (colour == "black") ...[
+            ...generateBlackBoard(tileWidth)
+          ] else if (colour == "white") ...[
+            ...generateWhiteBoard(tileWidth)
+          ]
+        ],
       ),
     );
   }
@@ -225,10 +226,10 @@ class _BoardState extends State<Board> {
                     child: widget.game.getAssetPathAtSquare((y, x)) != ""
                         ? SvgPicture.asset(
                             widget.game.getAssetPathAtSquare((y, x)),
-                            height: tileWidth,
-                            width: tileWidth,
+                            fit: BoxFit.contain,
                             key: ValueKey(
-                                widget.game.getAssetPathAtSquare((y, x))),
+                              widget.game.getAssetPathAtSquare((y, x)),
+                            ),
                           )
                         : null,
                   ),
