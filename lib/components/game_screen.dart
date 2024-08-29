@@ -66,7 +66,8 @@ class _GameScreenState extends State<GameScreen> {
         game.promotePawn(int.parse(row), int.parse(column), pieceType);
       });
     }
-    if (message.startsWith("opponent-resigned") || message.startsWith("disconnected")) {
+    if (message.startsWith("opponent-resigned") ||
+        message.startsWith("disconnected")) {
       if (server.myPieces == "white") {
         setState(() {
           game.gameState = GameState.whiteWin;
@@ -274,15 +275,17 @@ class _GameScreenState extends State<GameScreen> {
           if (promo.isMenuOpen) ...[
             openPromoMenu(),
           ],
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                game = Game(gameVariant: widget.gameVariant);
-                boardHighlights = BoardHighlights();
-              });
-            },
-            child: const Text('Reset'),
-          ),
+          if (widget.networkOption == NetworkOption.oneComputer) ...[
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  game = Game(gameVariant: widget.gameVariant);
+                  boardHighlights = BoardHighlights();
+                });
+              },
+              child: const Text('Reset'),
+            ),
+          ],
           const SomeVerticalSpace(),
           const Spacer(),
           Container(
