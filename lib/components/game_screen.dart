@@ -66,7 +66,8 @@ class _GameScreenState extends State<GameScreen> {
         game.promotePawn(int.parse(row), int.parse(column), pieceType);
       });
     }
-    if (message.startsWith("opponent-resigned") || message.startsWith("disconnected")) {
+    if (message.startsWith("opponent-resigned") ||
+        message.startsWith("disconnected")) {
       if (server.myPieces == "white") {
         setState(() {
           game.gameState = GameState.whiteWin;
@@ -308,6 +309,7 @@ class _GameScreenState extends State<GameScreen> {
 
   Container openPromoMenu() {
     return Container(
+      width: widgetWidth,
       color: const Color.fromARGB(255, 39, 3, 0),
       padding: const EdgeInsets.all(30),
       child: Column(
