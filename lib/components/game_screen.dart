@@ -25,12 +25,15 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
+const double widgetWidth = 411.2;
+
 class _GameScreenState extends State<GameScreen> {
   late Game game;
   var boardHighlights = BoardHighlights();
 
   Promo promo = Promo();
   final WebSocketService _webSocketService = WebSocketService();
+
   @override
   void initState() {
     game = Game(gameVariant: widget.gameVariant);
@@ -202,17 +205,20 @@ class _GameScreenState extends State<GameScreen> {
       body: Column(
         children: [
           const Spacer(),
-          SizedBox(
-            width: 360,
-            child: Text(
-              widget.networkOption == NetworkOption.oneComputer
-                  ? "black"
-                  : server.opponentUsername ?? "Waiting for opponent...",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: widgetWidth,
+              child: Text(
+                widget.networkOption == NetworkOption.oneComputer
+                    ? "Black"
+                    : server.opponentUsername ?? "Waiting for opponent...",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
             ),
           ),
           const SomeVerticalSpace(),
@@ -220,7 +226,7 @@ class _GameScreenState extends State<GameScreen> {
               ? WhiteCapturedPieces(game: game)
               : server.opponentPieces == null
                   ? Container(
-                      width: 360,
+                      width: widgetWidth,
                       height: 32,
                       color: Colors.black12,
                     )
@@ -240,7 +246,7 @@ class _GameScreenState extends State<GameScreen> {
               ? BlackCapturedPieces(game: game)
               : server.opponentPieces == null
                   ? Container(
-                      width: 360,
+                      width: widgetWidth,
                       height: 32,
                       color: Colors.black12,
                     )
@@ -248,17 +254,20 @@ class _GameScreenState extends State<GameScreen> {
                       ? BlackCapturedPieces(game: game)
                       : WhiteCapturedPieces(game: game),
           const SomeVerticalSpace(),
-          SizedBox(
-            width: 360,
-            child: Text(
-              widget.networkOption == NetworkOption.oneComputer
-                  ? "white"
-                  : server.myUsername ?? "Joining...",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: widgetWidth,
+              child: Text(
+                widget.networkOption == NetworkOption.oneComputer
+                    ? "White"
+                    : server.myUsername ?? "Joining...",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.right,
               ),
-              textAlign: TextAlign.right,
             ),
           ),
           const SomeVerticalSpace(),

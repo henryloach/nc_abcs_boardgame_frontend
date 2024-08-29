@@ -6,13 +6,16 @@ class CapturedPieceDisplay extends StatelessWidget {
   final List<ChessPiece> capturedPieces;
   final PieceColour colour;
 
+  final double widgetWidth = 411.2;
+
   const CapturedPieceDisplay(
       {super.key, required this.capturedPieces, required this.colour});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 360,
+      width: widgetWidth,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 30,
       color: Colors.black12,
       child: Row(
