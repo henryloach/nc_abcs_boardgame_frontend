@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
           });
         },
         dropdownMenuEntries: GameVariant.values.map((value) {
-          return DropdownMenuEntry(value: value, label: value.name);
+          return DropdownMenuEntry(value: value, label: gameVariantNameMap[value]);
         }).toList());
   }
 
@@ -221,6 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_networkOption == NetworkOption.network) {
       _webSocketService.sendMessage('user:${user.username}');
+      _webSocketService.sendMessage('variant:${_selectedVariant.name}');
     }
 
     Navigator.push(

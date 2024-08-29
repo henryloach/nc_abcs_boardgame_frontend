@@ -35,6 +35,7 @@ class _BoardState extends State<Board> {
   handleClick(y, x) {
     setState(() {
       // no piece selected already
+      if (server.opponentUsername == null || server.opponentUsername == 'Waiting for opponent...' ) return;
       if (widget.boardHighlights.selected == null &&
           widget.game.board[y][x] == null) return;
       if (widget.boardHighlights.selected == null &&
@@ -63,7 +64,7 @@ class _BoardState extends State<Board> {
             widget.boardHighlights.previousMoveStart =
                 widget.boardHighlights.selected;
             widget.boardHighlights.previousMoveEnd = (y, x);
-            if (widget.networkOption == NetworkOption.network) {
+            if (widget.networkOption == NetworkOption.network ) {
               widget.game.movePiece(widget.boardHighlights.selected!, (y, x));
               _webSocketService.sendMessage(
                   'move:${widget.boardHighlights.selected!.$1},${widget.boardHighlights.selected!.$2},$y,$x');

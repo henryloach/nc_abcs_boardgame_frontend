@@ -56,10 +56,19 @@ enum GameVariant {
   normal,
   edgeWrap,
   horde,
+  endgame
 }
 
 const Map gameVariantFenMap = {
   GameVariant.normal: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   GameVariant.edgeWrap: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-  GameVariant.horde : "rnbqkbnr/pppppppp/8/8/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP b kq - 0 1"
+  GameVariant.horde : "rnbqkbnr/pppppppp/8/8/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP b kq - 0 1",
+  GameVariant.endgame : "4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1",
+};
+
+const Map gameVariantNameMap = {
+  GameVariant.normal: 'Standard',
+  GameVariant.edgeWrap: 'Edge Wrap',
+  GameVariant.horde : 'Horde',
+  GameVariant.endgame : 'Endgame',
 };
