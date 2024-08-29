@@ -66,7 +66,7 @@ class _GameScreenState extends State<GameScreen> {
         game.promotePawn(int.parse(row), int.parse(column), pieceType);
       });
     }
-    if (message.startsWith("opponent-resigned")) {
+    if (message.startsWith("opponent-resigned") || message.startsWith("disconnected")) {
       if (server.myPieces == "white") {
         setState(() {
           game.gameState = GameState.whiteWin;
