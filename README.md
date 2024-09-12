@@ -1,43 +1,116 @@
-# ABC's Chess Boardgame
+# Northchess: Multiplayer Chess Game (Frontend)
 
-This is the front-end implementation of **ABC's Chess**, a chess game built using the **Flutter** framework. The project was created as part of the **Northcoders Bootcamp**, demonstrating our skills in mobile app development, game logic, and UI/UX design.
+Welcome to **Northchess**, an online multiplayer chess game developed as part of the Northcoders Software Development Bootcamp. This Flutter-based project showcases our team's skills in mobile and game development.
+
+## Project Overview
+
+Northchess consists of two main components:
+
+1. **Frontend (This Repository)**: A Flutter-based mobile application that handles the game logic, user interface, and player interactions.
+2. **Backend**: A Dart-based server that manages real-time updates and multiplayer functionality. ([Backend Repository](https://github.com/baberlabs/nc_abcs_boardgame_backend))
 
 ## Features
 
-- Full implementation of standard chess rules.
-- Dynamic UI for displaying the chess board and captured pieces.
-- Promotion of pawns to more powerful pieces (Queen, Bishop, Rook, or Knight).
-- Win detection, including conditions for Checkmate and Stalemate.
-- Support for En Passant, Castling, and all special moves.
-- Reset game functionality for restarting a match.
-- Modern design with SVG assets for each chess piece.
+-   Full chess gameplay, including special moves like En Passant and Castling
+-   Multiple game variants: Classic, Edge Wrap, Horde, and Endgame
+-   Real-time board updates
+-   Pawn promotion
+-   Checkmate and stalemate detection
+-   Online multiplayer and offline practice mode
+-   Clean, modern interface with high-quality chess pieces
 
 ## Tech Stack
 
-- **Language**: Dart
-- **Framework**: Flutter
-- **Packages Used**:
-  - `flutter_svg` for handling SVG images of chess pieces.
+-   **Language**: Dart
+-   **Framework**: Flutter
+-   **Key Packages**:
+    -   `flutter_svg`: For displaying chess pieces
+    -   `web_socket_channel`: For real-time communication with the backend
 
-## How to Run
+## Getting Started
 
-1. Ensure that you have the **Flutter SDK** installed on your local machine.
-2. Clone the repository.
-3. Run `flutter pub get` to install the required dependencies.
-4. Start the app on your preferred emulator or device by running:
-   flutter run
+### Prerequisites
 
+-   Flutter SDK (latest stable version)
+-   Dart SDK (latest stable version)
+-   An IDE (Visual Studio Code or Android Studio)
+-   Git
+-   Backend server running (see [backend repository](https://github.com/baberlabs/nc_abcs_boardgame_backend) for setup instructions)
 
-## Northcoders Bootcamp
+### Installation
 
-This project was built as part of the Northcoders Bootcamp, a program designed to train developers in modern software engineering techniques. It showcases our ability to work with Flutter, Dart, and game development concepts.
+1. Clone the repository:
+    ```bash
+    $ git clone https://github.com/henryloach/nc_abcs_boardgame_frontend
+    ```
+2. Navigate to the project folder:
+    ```bash
+    $ cd northchess-frontend
+    ```
+3. Install dependencies:
+    ```bash
+    $ flutter pub get
+    ```
 
-## Contributors
+### Running the App
 
-- **[Christian Loach](https://github.com/henryloach)**
-- **[Baber Khan](https://github.com/baberlabs)**
-- **[Ahmad Mustaffar](https://github.com/amustaffar)**
-- **[Svitlana Horodylova](https://github.com/horodylova)**
+1. Ensure the backend server is running for multiplayer functionality.
+2. Connect a device or start an emulator.
+3. Run the app:
+    ```bash
+    $ flutter run
+    ```
 
-Feel free to check out our GitHub profiles for other projects and contributions!
-Thank you for checking out our project! 🎉
+For more details, see the [Flutter setup guide](https://flutter.dev/docs/get-started/install).
+
+## Game Variants
+
+-   **Classic**: Traditional chess rules
+-   **Edge Wrap**: Pieces can move across board edges
+-   **Horde**: White starts with extra pawns
+-   **Endgame**: Limited pieces from the start
+
+## Architecture
+
+-   **Frontend (This Repository)**:
+    -   Implements all game logic and state management
+    -   Handles user interactions and game moves
+    -   Communicates with the backend for multiplayer functionality
+-   **Backend**:
+    -   Manages WebSocket connections for real-time updates
+    -   Handles player matchmaking and game session management
+    -   Relays move information between players in multiplayer games
+
+## Meet the Team
+
+-   [Christian Loach](https://github.com/henryloach)
+-   [Baber Khan](https://github.com/baberlabs)
+-   [Ahmad Mustaffar](https://github.com/amustaffar)
+-   [Svitlana Horodylova](https://github.com/horodylova)
+
+## Contributing
+
+We welcome contributions to both the frontend and backend! Please follow these steps:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/AmazingFeature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
+
+Ensure your code adheres to our coding standards and include tests for new features.
+
+## License
+
+This project is licensed under the MIT License.
+
+## About Northcoders Bootcamp
+
+This project was created during the 13-week Northcoders Software Development Bootcamp. The program focuses on full-stack development and provides 480 contact hours of training. While the bootcamp primarily teaches JavaScript, we applied our skills to build this Flutter/Dart application with a complementary backend.
+
+For more information, visit the [Northcoders Website](https://northcoders.com/our-courses/coding-bootcamp).
+
+---
+
+Thank you for your interest in **Northchess**. If you have any questions or feedback, please open an issue on this repository. Enjoy playing! ♟️
