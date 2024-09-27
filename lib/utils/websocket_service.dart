@@ -14,7 +14,7 @@ class WebSocketService {
   }
 
   WebSocketService._internal() {
-    _startWebSocket('ws://christianloach.com:8080'); //server url goeshere
+    _startWebSocket('wss://www.christianloach.com:8080'); //server url goeshere
   }
 
   // TODO remove all these print statements maybe at some point
